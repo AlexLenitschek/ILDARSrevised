@@ -1,5 +1,7 @@
 import ildars
 from . import testrooms
+from . import signal_simulation
+import random
 
 # TODO: Generate Test meaurements such as:
 # (direct_signals, reflected_signals) = simulate.simulate_measurements(...)
@@ -13,5 +15,8 @@ from . import testrooms
 # )
 # TODO: Evaluate computed sender positions.
 
-print(list(ildars.ClusteringAlgorithm))
-print(testrooms.CUBE)
+receiver_position = (0.1, 0.1, 0.1)
+# random sender positions
+sender_positions = [(random.uniform(-1,1), random.uniform(-1,1), random.uniform(-1,1)) for i in range(10)]
+
+(direct_signals, reflected_signals) = signal_simulation.generate_measurements(receiver_position,sender_positions,testrooms.CUBE)
