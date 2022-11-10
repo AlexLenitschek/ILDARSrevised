@@ -62,23 +62,27 @@ def degreeToRadian(degAngle):
 
 #issue in printing
 #print(find_center_point(1,2,3))
+# Explanation TODO; Function by Rico Gießler
 def Calc_lat_long(*points):
-	x = points[[1]]
 	y = points[[2]]
 	radius = math.sqrt(x**2 + y**2 + z**2)
 	lat = np.ArcSin(z/radius)
 	lon = np.ArcTan(x,y)
 	return(int(latitude/Pi*180), int((longitude)/Pi*180), int(radius))
 
-
+# Explanation TODO; Function by Rico Gießler
 def cartesian_pts(*points):
 	lat = points[[1]]
 	lon = points[[2]]
 	radius = points[[3]]
 	return(int(radius*np.cos(radianToDegree(lat))*np.cos(radianToDegree(lon))), int(radius*np.cos(radianToDegree(lat))*np.sin(radianToDegree(lon))), int(radius*np.sin(radianToDegree(lat))))
 
-
-
+# Compute a circle that intersects with the wall (as described in where's waldo talk), 
+# defined by it's center radius and normal (vector perpendicular to the circle's surface).
+# takes as input a measurement, i.e. a triple (v,w,Delta) where 
+#   v is the direction of the direct signal
+#   w is the direction of the reflected signal
+#   Delta is the time difference between receiving the direct and the reflected signal.
 def Circ_from_measurement(*measurement):
 	v = measurement[1]
 	w = measurement[2]
@@ -89,42 +93,48 @@ def Circ_from_measurement(*measurement):
 	return(center, radius, normal)
 
 
-
+# Compute a circular segment (instead of the completed circle) which intersects with the wall (as described in where's waldo talk).
+# Since we only need the endpoints of the circular segment, only those will be computed, 
+# even though for a complete geometric description of the circle segment, we would also need the center and radius.
+# For computing radius and center, the previous function "Circ_from_measuremnt" could be used.
+# takes as input a measurement, i.e. a triple (v,w,Delta) where 
+#   v is the direction of the direct signal
+#   w is the direction of the reflected signal
+#   Delta is the time difference between receiving the direct and the reflected signal.
 def segment_from_measurement(*measurement):
 	Segments = {}
-	v = measurement[[1]]
-	w = measurement[[2]]
-	delta = measurement[[3]]
+	v = measurement[1]
+	w = measurement[2]
+	delta = measurement[3]
 	p1 = delta * (w - v)/np.normalize(w - v)**2
 	p2 = delta/2*w
 	return(p1, p2)
 
-
-#in mathematica script, the below has an extra radius argument
-#also, how to pass normal as an array?
-# i guess in python *center and center can be passed alternatively ..
+# For a given circle (that goes through the orign by construction), compute it's inversion which is a line
+# For a line l : p + x * d (where p is a point on l and d is a vector parallel to the line), we return
+#   point p (called linePosition)
+#   vector d (called lineDirection)
 def invertCirc3D(center,normal):
   	mirrorPoint = center * 2
-  	linePosition = InvertVector3D(mirrorPoint[[1]], mirrorPoint[[2]], mirrorPoint[[3]])
-  	lineDirection = np.normalize(np.cross(linePosition, normal))
+  	linePosition = InvertVector3D(mirrorPoint[1], mirrorPoint[2], mirrorPoint[3])
+  	lineDirection = np.normalize(np.cross(linePosition, normal)) # This will not work, as there is no np.normalize
   	return(linePosition, lineDirection)
-  
 
-
-
+# Explanation TODO; Function by Rico Gießler
 def mapping_2d(v):
 	euc = math.sqrt(v[[1]]**2 + v[[2]]**2)
 	return(v[[1]]/euc,v[[2]]/euc)
 
+# Explanation TODO; Function by Rico Gießler
 def mapping_3d(v):
 	euc = math.sqrt(v[[1]]**2 + v[[2]]**2 + v[[3]]**2)
 	return(v[[1]]/euc,v[[2]]/euc, v[[3]]/euc)
 
-
+# Explanation TODO; Function by Rico Gießler
 def GetVector(points):
 	return(points[[1]], points[[2]] - points[[1]])
 
-
+# Explanation TODO; Function by Rico Gießler
 def GetVectors(lines):
 	for i in range(1,len(lines)):
 		vectors.append(GetVector(lines[[[i]]]))
@@ -142,6 +152,7 @@ def GetVectors(lines):
 
 
 
+# Explanation TODO; Function by Rico Gießler
 def OnSegment(p1,p2,p3):
 	if(p2[[1]]) <= Max(p1[[1]], p3[[1]]) and p2[[1]] >= Min(p1[[1]], p3[[1]]) and p2[[2]] <= Max(p1[[2]], p3[[2]]) and p2[[2]] >= Min(p1[[2]], p3[[2]]):
 		output = True
@@ -151,8 +162,7 @@ def OnSegment(p1,p2,p3):
 	return(output)
 
 # what does the orientation function do ? why did return have originally 1,2 for values > 0 ? 
-
-
+# Explanation TODO; Function by Rico Gießler
 def Orientation(p1,p2,p3):
 	value = (p2[[2]] - p1[[2]])*(p3[[1]] - p2[[1]]) - (p2[[1]] - p1[[1]])*(p3[[2]] - p2[[2]])
 	if(value==0):
@@ -162,7 +172,7 @@ def Orientation(p1,p2,p3):
 
 	return(ret)
 
-
+# Explanation TODO; Function by Rico Gießler
 def DoIntersect(segment1,segment2):
 	p1 = segment1[[1]]
 	q1 = segment1[[2]]
@@ -196,8 +206,8 @@ def DoIntersect(segment1,segment2):
 	#{minZ, maxZ} = np.sort({p1[3], p2[3]})
 
 
+# Explanation TODO; Function by Rico Gießler
 def NormalVectorFromTwoMeasurements(v1,w1,v2,w2):
-
 	value = np.cross(np.cross(v1,w1),np.cross(v2,w2))
 	if(value == {0,0,0}):
 		value = 1
@@ -205,30 +215,30 @@ def NormalVectorFromTwoMeasurements(v1,w1,v2,w2):
 
 # for meeting : 09/11/2022		
 
+# Explanation TODO; Function by Rico Gießler
 def getCosC(point,mappingpoint):
 	return(math.sin((radianToDegree(mappingpoint[1])))*math.sin((radianToDegree(point[1]))) + math.cos((radianToDegree(mappingpoint[1])))*math.cos(radianToDegree(point[1]))*math.cos(radianToDegree(point[2]-mappingpoint[2])))
-
-
 
 def AdjustWallVectorLengthFromMeasurementsAndDirection(u,v,w,delta):
 	r = p*v
 	s = (p + delta+w)
 	return(((r+s)/2)*u*u/Norm(u)**2)
 
-
-
+# Given a measurement (v,w,Delta) and the normal vector n of a wall (assuming that w was reflect from the wall for which n is the normal vector),
+# we can compute the distance of the sender using the "Wall Direction" formula as described in Proto-ILDARS Talk/Slides.
 def ComputeSenderDistanceWallDirection(v,w,delta,n):
 	b = np.cross(np.cross(np.normalize(n),v),np.normalize(n))
 	return(((delta*w)*b)/(v-w)*b)
 
-
-
+# MM: Something is not right here, I assume the parameter n is missing
+# Other than that, this function is an implementation of the "Map to normal wall vector" formula described in Proto-ILDARS Talk/Slides.
 def ComputeSenderDistanceMapToNormalVector(v,w,delta):
 	return((2*n - delta*w)*n/(v+w)*n)
 
 #ComputeSenderPositionClosestLinesExtended[vwnList_] :=  TO BE IMPLEMENTED
 
-
+# MM: I think this was implemented by Tobias Grugel and is used for wall normal vector computation. I will have to confirm that though.
+# TODO: Explanation
 def AdjustWallVectorLengthFromMeasurementsAndDirection(u,v,w,delta):
 	r = p*v
 	s = (p + delta)*w
@@ -237,7 +247,8 @@ def AdjustWallVectorLengthFromMeasurementsAndDirection(u,v,w,delta):
 	t = rsdotu*u/norm(u)**2
 	return(t)
 
-
+# MM: Not quite sure who implemented this, I think the function is used for Error simulation
+# Explanation TODO
 def RandomOrthogonalVector(vector,angle):
 	normalizedvector = vector/norm(vector)
 	rearrangedvector = {-1*normalizedvector[3],normalizedvector[1],normalizedvector[2]}
