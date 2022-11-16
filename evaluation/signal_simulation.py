@@ -28,6 +28,7 @@ def generate_measurements(receiver_position, sender_positions, room):
             edge2 = np.subtract(triangle[2], triangle[0])
             normal = np.cross(edge1, edge2)
             line_direction = np.divide(normal, np.linalg.norm(normal))
+            # TODO: Remove check and just compute mirror point anyway
             intersection_point = get_line_triangle_intersection(receiver_position, line_direction, triangle)
             if intersection_point is None:
                 # Continue with next triangle, if no intersection exists
@@ -43,10 +44,13 @@ def generate_measurements(receiver_position, sender_positions, room):
             reflected_signal_length = np.linalg.norm(np.add(np.subtract(sender_position, reflection_point), reflected_signal_direction))
             reflected_signal_direction = np.divide(reflected_signal_direction, np.linalg.norm(reflected_signal_direction))
             reflected_signals.append(ildars.ReflectedSignal(reflected_signal_direction, direct_signal, reflected_signal_length - direct_signal_length))
-    # for debugging: print numbers of direct and reflected signals found
+
+    # Debugging section: Plot the room and the reflections
     print("found", len(direct_signals), "direct signals")
     print("found", len(reflected_signals), "reflected signals")
-    return (direct_signal, reflected_signals)
+    
+    # End of debugging section
+    return (direct_signals, reflected_signals)
 
 def get_line_triangle_intersection(line_point,line_direction,triangle):
         # Check if line l : line_point + x * normal intersects with our triangle,
