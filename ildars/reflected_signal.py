@@ -10,7 +10,7 @@ class ReflectedSignal:
     and stores a reference to the associated direct signal and the respective time
     difference between receiving the two signals.
     """
-    def __init__(self, direction, direct_signal, time_difference):
+    def __init__(self, direction, direct_signal, delta):
         self.direction = direction
         self.direct_signal = direct_signal
-        self.time_difference = time_difference
+        self.delta = delta

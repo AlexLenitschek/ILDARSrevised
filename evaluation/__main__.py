@@ -21,6 +21,15 @@ sender_positions = [(random.uniform(-1,1), random.uniform(-1,1), random.uniform(
 
 (direct_signals, reflected_signals) = signal_simulation.generate_measurements(receiver_position,sender_positions,testrooms.CUBE)
 
+### For now: hardcoded inversion based clustering. In the future, evaulate all implemented algorithms of the ILDARS pipeline here
+reflection_clusters = ildars.compute_sender_positions(
+    direct_signals, 
+    reflected_signals, 
+    ildars.ClusteringAlgorithm.INVERSION, 
+    ildars.WallNormalAlgorithm.ALL_PAIRS, 
+    ildars.WallSelectionMethod.LARGEST_REFLECTION_CLUSTER,
+    ildars.LocalizationAlgorithm.CLOSEST_LINES)
+
 ### Debugging visualization
 import vedo
 import os
