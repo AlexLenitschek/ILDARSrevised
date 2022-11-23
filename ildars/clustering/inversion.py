@@ -26,7 +26,7 @@ def compute_cirular_segments_from_reflections(reflected_signals):
     return segments
 
 def invert_circular_segments(circular_segments):
-    return [[invert_vector(segment[0]), invert_vector(segment[1])] for segment in circular_segments]
+    return [[invert_vector(vec) for vec in segment] for segment in circular_segments]
 
 def compute_reflection_clusters(reflected_signals):
     # Compute circular segments from measurements
