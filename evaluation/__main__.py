@@ -31,14 +31,14 @@ reflection_clusters = ildars.compute_sender_positions(
     ildars.LocalizationAlgorithm.CLOSEST_LINES)
 
 ### Debugging visualization
-import vedo
-import os
-import numpy as np
+# import vedo
+# import os
+# import numpy as np
 
-room = vedo.Mesh(os.getcwd() + "/evaluation/testrooms/models/cube.obj").wireframe()
-direct_signal_arrows = [
-    vedo.Arrow(receiver_position, np.add(receiver_position, direct_signal.direction),s=0.002).color("red")
-    for direct_signal in direct_signals]
-reflected_signal_arrows = [vedo.Arrow(receiver_position, np.add(receiver_position, reflected_signal.direction),s=0.002).color("blue") for reflected_signal in reflected_signals]
+# room = vedo.Mesh(os.getcwd() + "/evaluation/testrooms/models/cube.obj").wireframe()
+# direct_signal_arrows = [
+#     vedo.Arrow(receiver_position, np.add(receiver_position, direct_signal.direction),s=0.002).color("red")
+#     for direct_signal in direct_signals]
+# reflected_signal_arrows = [vedo.Arrow(receiver_position, np.add(receiver_position, reflected_signal.direction),s=0.002).color("blue") for reflected_signal in reflected_signals]
 
-vedo.show(room, direct_signal_arrows, reflected_signal_arrows)
+# vedo.show(room, direct_signal_arrows, reflected_signal_arrows)
