@@ -30,10 +30,11 @@ def compute_reflection_clusters(reflected_signals):
         current_closest_dist = math.inf
         # Find closest Bin
         for bin in bins:
-            current_dist = bin.get_distance(line)
-            if current_dist < current_closest_dist:
-                current_closest_bin = bin
-                current_closest_dist = dist
+            pass
+            # current_dist = bin.get_distance(line)
+            # if current_dist < current_closest_dist:
+            #     current_closest_bin = bin
+            #     current_closest_dist = dist
 
     ### Debugging: Vizualise inversions
     room = vedo.Mesh(os.getcwd() + "/evaluation/testrooms/models/cube.obj").wireframe()
