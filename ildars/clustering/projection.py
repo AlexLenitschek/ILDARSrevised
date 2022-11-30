@@ -9,6 +9,14 @@ import math
 from numpy.linalg import norm 
 import random
 
+# Entry point of projection based clustering. Takes as input all measurements (ReflectedSignal class here)
+def compute_reflection_clusters(reflected_signals):
+	# TODO: Call the right functions from here
+	# Step 1: Compute map circular segments to unit sphere
+	# Step 2: Compute gnomonic projection for mapping (arcs)
+	# Step 3: Compute clusters using the improved intersections algorithm
+	pass
+
 def find_center_point(points):
 
 	ang = angleBetweenTwoVecor(points[[1]],points[[2]])
