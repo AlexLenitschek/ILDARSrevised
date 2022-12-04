@@ -6,6 +6,7 @@ from enum import Enum
 from .direct_signal import DirectSignal
 from .reflected_signal import ReflectedSignal
 from .clustering import inversion
+from .clustering import projection
 from . import wall_normal_vector
 
 ClusteringAlgorithm = Enum('ClusteringAlgorithm', [
@@ -47,6 +48,8 @@ def run_ildars(
 def compute_reflection_clusters(clustering_algorithm, reflected_signals):
     if clustering_algorithm is ClusteringAlgorithm.INVERSION:
         return inversion.compute_reflection_clusters(reflected_signals)
+    elif clustering_algorithm is ClusteringAlgorithm.GNOMONIC_PROJECTION:
+        return projection.compute_reflection_clusters(reflected_signals)
     else:
         raise NotImplementedError("Clustering algorithm", clustering_algorithm, "is not known or not implemented.")
 
