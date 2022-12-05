@@ -94,6 +94,12 @@ class Bin:
         if self.center:
             line_to_center = np.subtract(self.center, line.p1)
             line_projection_length = np.dot(line_to_center, line.direction)
+            # clamp projection
+            line_length = np.linalg.norm(np.subtract(line.p2, line.p1))
+            if line_projection_length < 0:
+                line_projection_length = 0
+            elif line_projection_length > line_length:
+                line_projection_length = line_length
             line_projection = np.add(line.p1, np.multiply(line.direction, line_projection_length))
             direction_to_line = np.subtract(line_projection, self.center)
             current_num_lines = len(self.lines)
@@ -127,11 +133,11 @@ class Bin:
                 # Segments are parallel and overlapping. No unique solution exists.
                 self.center = np.divide(np.add(np.add(bin_line.p1, bin_line.p2), np.add(line.p1, line.p2)), 4)
                 # compute projection on lines
-                bin_line_to_center = np.subtract(center, bin_line.p1)
+                bin_line_to_center = np.subtract(self.center, bin_line.p1)
                 bin_line_projection_length = np.dot(bin_line_to_center, bin_line.direction)
                 bin_line_projection = np.add(bin_line.p1, np.multiply(bin_line.direction, bin_line_projection_length))
                 pA = bin_line_projection
-                line_to_center = np.subtract(center, line.p1)
+                line_to_center = np.subtract(self.center, line.p1)
                 line_projection_length = np.dot(line_to_center, line.direction)
                 line_projection = np.add(line.p1, np.multiply(line.direction, line_projection_length))
                 pB = line_projection
