@@ -76,21 +76,106 @@ class Line:
     def __init__(self, p1, p2):
         self.p1 = p1
         self.p2 = p2
-        self.direction = np.subtract(p2, p1)
+        self.direction = np.subtract(self.p2, self.p1)
+        # normalize direction
+        self.direction = np.divide(self.direction, np.linalg.norm(self.direction))
     
     def __str__(self):
         return "Line with points: " + str(self.p1) + ", " + str(self.p2) + " and direction " + str(self.direction)
 
+    def get_distance_to_point(self, point):
+        vec = np.subtract(point, self.p0)
+        return np.dot(vec, self.direction)
+
 class Bin:
-    lines = []
-    center = None
     # default constructor, create bin with just one line (passed as an index)
     def __init__(self, line):
-        self.lines.append(line)
+        self.lines = [line]
+        self.center = None
 
     # Get the distance of a given line to the bin
-    def get_distance(self, line):
+    def get_distance_to_line(self, line):
         if self.center:
             pass
             # TODO: compute distance from (finite!) line to bin's center and return it
-        # TODO: compute distance between two (finite!) lines, return it and set it as the bin center
+        # Based on first answer from https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
+        bin_line = self.lines[0]
+        pA = 0 # Closest point on bin_line to line
+        pB = 0 # Closest point on line to bin_line
+        cross = np.cross(bin_line.direction, line.direction)
+        denominator = np.linalg.norm(cross)
+        if denominator < EPSILON:
+            # Lines are parallel
+            d0 = np.dot(bin_line.direction, np.subtract(line.p1, bin_line.p1))
+            d1 = np.dot(bin_line.direction, np.subtract(line.p2, bin_line.p1))
+            if d0 <= 0 >= d1:
+                if np.absolute(d0) < np.absolute(d1):
+                    pA = bin_line.p1
+                    pB = line.p1
+                else:
+                    pA = bin_line.p1
+                    pB = line.p2
+            elif d0 >= np.linalg.norm(np.subtract(bin_line.p2, bin_line.p1)) <= d1:
+                if np.absolute(d0) < np.absolute(d1):
+                    pA = bin_line.p2
+                    pB = line.p1
+                else:
+                    pA = bin_line.p2
+                    pB = line.p2
+            else:
+                # Segments are parallel and overlapping. No unique solution exists.
+                center = np.divide(np.add(np.add(bin_line.p1, bin_line.p2), np.add(line.p1, line.p2)), 4)
+                # compute projection on lines
+                bin_line_to_center = np.subtract(center, bin_line.p1)
+                bin_line_projection_length = np.dot(bin_line_to_center, bin_line.direction)
+                bin_line_projection = np.add(bin_line.p1, np.multiply(bin_line.direction, bin_line_projection_length))
+                pA = bin_line_projection
+                line_to_center = np.subtract(center, line.p1)
+                line_projection_length = np.dot(line_to_center, line.direction)
+                line_projection = np.add(line.p1, np.multiply(line.direction, line_projection_length))
+                pB = line_projection
+
+        else:
+            # Lines are not parallel
+            t = np.subtract(line.p1, bin_line.p1)
+
+            detA = np.linalg.det([t, line.direction, cross])
+            detB = np.linalg.det([t, bin_line.direction, cross])
+            
+            t0 = detA / denominator
+            t1 = detB / denominator
+
+            # Compute projections
+            pA = np.add(bin_line.p1, np.multiply(bin_line.direction, t0))
+            pB = np.add(line.p1, np.multiply(line.direction, t1))
+
+            # Clamp projections
+            if t0 < 0:
+                pA = bin_line.p1
+            elif t0 > np.linalg.norm(np.subtract(bin_line.p2, bin_line.p1)):
+                pA = bin_line.p2
+            
+            if t0 < 0:
+                pB = line.p1
+            elif t0 > np.linalg.norm(np.subtract(line.p2, line.p1)):
+                pB = line.p2
+
+            if t0 < 0 or t0 > np.linalg.norm(np.subtract(bin_line.p2, bin_line.p1)):
+                dot = np.dot(line.direction, np.subtract(pA, line.p1))
+                if dot < 0:
+                    dot = 0
+                elif dot > np.linalg.norm(np.subtract(line.p2, line.p1)):
+                    dot = np.linalg.norm(np.subtract(line.p2, line.p1))
+                pB = line.p1 + np.multiply(line.direction, dot)
+
+            if t1 < 0 or t1 > np.linalg.norm(np.subtract(line.p2, line.p1)):
+                dot = np.dot(bin_line.direction, np.subtract(pB, bin_line.p1))
+                if dot < 0:
+                    dot = 0
+                elif dot > np.linalg.norm(np.subtract(bin_line.p2, bin_line.p1)):
+                    dot = np.linalg.norm(np.subtract(bin_line.p2, bin_line.p1))
+                pA = bin_line.p1 + np.multiply(bin_line.direction, dot)
+
+        # Compute center and return distance between the two points
+        center = np.add(pA, np.divide(np.subtract(pB, pA), 2))
+        return np.linalg.norm(np.subtract(pB, pA))
