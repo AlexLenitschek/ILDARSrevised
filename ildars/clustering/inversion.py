@@ -83,10 +83,6 @@ class Line:
     def __str__(self):
         return "Line with points: " + str(self.p1) + ", " + str(self.p2) + " and direction " + str(self.direction)
 
-    def get_distance_to_point(self, point):
-        vec = np.subtract(point, self.p0)
-        return np.dot(vec, self.direction)
-
 class Bin:
     # default constructor, create bin with just one line (passed as an index)
     def __init__(self, line):
@@ -96,8 +92,13 @@ class Bin:
     # Get the distance of a given line to the bin
     def get_distance_to_line(self, line):
         if self.center:
-            pass
-            # TODO: compute distance from (finite!) line to bin's center and return it
+            line_to_center = np.subtract(self.center, line.p1)
+            line_projection_length = np.dot(line_to_center, line.direction)
+            line_projection = np.add(line.p1, np.multiply(line.direction, line_projection_length))
+            direction_to_line = np.subtract(line_projection, self.center)
+            current_num_lines = len(self.lines)
+            shift_factor = 1 - (current_num_lines / (current_num_lines + 1))
+            self.center = np.add(self.center, np.multiply(direction_to_line, shift_factor))
         # Based on first answer from https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
         bin_line = self.lines[0]
         pA = 0 # Closest point on bin_line to line
@@ -124,7 +125,7 @@ class Bin:
                     pB = line.p2
             else:
                 # Segments are parallel and overlapping. No unique solution exists.
-                center = np.divide(np.add(np.add(bin_line.p1, bin_line.p2), np.add(line.p1, line.p2)), 4)
+                self.center = np.divide(np.add(np.add(bin_line.p1, bin_line.p2), np.add(line.p1, line.p2)), 4)
                 # compute projection on lines
                 bin_line_to_center = np.subtract(center, bin_line.p1)
                 bin_line_projection_length = np.dot(bin_line_to_center, bin_line.direction)
@@ -177,5 +178,5 @@ class Bin:
                 pA = bin_line.p1 + np.multiply(bin_line.direction, dot)
 
         # Compute center and return distance between the two points
-        center = np.add(pA, np.divide(np.subtract(pB, pA), 2))
+        self.center = np.add(pA, np.divide(np.subtract(pB, pA), 2))
         return np.linalg.norm(np.subtract(pB, pA))
