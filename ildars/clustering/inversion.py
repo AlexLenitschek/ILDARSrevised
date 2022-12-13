@@ -2,6 +2,7 @@
 import numpy as np
 import math
 from enum import Enum
+from random import randint
 
 ### Only for debugging purposes
 import vedo
@@ -53,10 +54,14 @@ def compute_reflection_clusters(reflected_signals):
     for bin in bins:
         print(bin)
 
-    ### Debugging: Vizualise inversions
+    ### Debugging: Vizualise bins
     room = vedo.Mesh(os.getcwd() + "/evaluation/testrooms/models/cube.obj").wireframe()
-    visualization_lines = [vedo.Line(line.p1, line.p2) for line in lines]
-    vedo.show(room, visualization_lines)
+    # For each bin, get its lines in a random color
+    visualization_lines = [bin.get_visualization_lines('#%06X' % randint(0, 0xFFFFFF)) for bin in bins]
+    axes = vedo.Axes(room, xrange = (-1.5, 1.5), yrange = (-1.5, 1.5), zrange = (-1.5, 1.5))
+    vedo.show(room, visualization_lines, axes,
+        camera={'pos': (5,5,5), 'viewup': (0,0,1), 'focal_point': (0,0,0)},
+    ).close()
 
 ### Helper functions
 def invert_vector(vec):
@@ -245,5 +250,7 @@ class Bin:
         for i, line in enumerate(self.lines):
             result += str(i) + ": " + str(line) + "\n"
         return result
-
-
+    
+    # for debugging visualization
+    def get_visualization_lines(self, color):
+        return [vedo.Line(line.p1, line.p2, c=color) for line in self.lines]
