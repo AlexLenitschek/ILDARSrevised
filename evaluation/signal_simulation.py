@@ -7,6 +7,8 @@ EPSILON = 0.000000001
 def generate_measurements(receiver_position, sender_positions, room):
     direct_signals = []
     reflected_signals = []
+    # For debugging: assign an index to each reflected signal
+    reflection_index = 0
 
     # collect indices for faces
     room_triangle_indices = [room.meshes[key].faces for key in room.meshes] 
@@ -42,7 +44,8 @@ def generate_measurements(receiver_position, sender_positions, room):
             reflected_signal_direction = np.subtract(reflection_point, receiver_position)
             reflected_signal_length = np.linalg.norm(reflected_signal_direction) + np.linalg.norm(np.subtract(sender_position, reflection_point))
             reflected_signal_direction = np.divide(reflected_signal_direction, np.linalg.norm(reflected_signal_direction))
-            reflected_signals.append(ildars.ReflectedSignal(reflected_signal_direction, direct_signal, reflected_signal_length - direct_signal_length))
+            reflected_signals.append(ildars.ReflectedSignal(reflected_signal_direction, direct_signal, reflected_signal_length - direct_signal_length, reflection_index))
+            reflection_index += 1
     
     return (direct_signals, reflected_signals)
 

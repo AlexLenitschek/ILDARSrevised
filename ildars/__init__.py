@@ -39,9 +39,17 @@ def run_ildars(
     """
     # Compute reflection clusters
     reflection_clusters = compute_reflection_clusters(clustering_algorithm, reflected_signals)
+    # Debugging
+    # for index, cluster in enumerate(reflection_clusters):
+    #     print("cluster #", index)
+    #     for reflection in cluster:
+    #         print(" ", reflection)
     # Compute wall normal vectors. Wall normal vectors will be assigned to each reflected signal.
-    for reflection_cluster in reflection_clusters:
-        compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster)
+    for reflection_cluster in reflection_clusters: compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster)
+    # Debugging
+    print("found wall normals:")
+    for i, cluster in enumerate(reflection_clusters):
+        print(i,": ", cluster.wall_normal)
     # Compute and return sender positions
     return compute_sender_positions(wall_selection_algorithm, localization_algorithm, reflection_clusters, direct_signals, reflected_signals)
 
@@ -54,6 +62,7 @@ def compute_reflection_clusters(clustering_algorithm, reflected_signals):
         raise NotImplementedError("Clustering algorithm", clustering_algorithm, "is not known or not implemented.")
 
 def compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster):
+    print("now computing wall vector")
     if wall_normal_algorithm is WallNormalAlgorithm.ALL_PAIRS:
         return wall_normal_vector.compute_wall_normal_vector_all_pairs(reflection_cluster)
     elif wall_normal_algorithm is WallNormalAlgorithm.LINEAR_ALL_PAIRS:

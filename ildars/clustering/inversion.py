@@ -3,6 +3,7 @@ import numpy as np
 import math
 from enum import Enum
 from random import randint
+from .cluster import ReflectionCluster
 
 ### Only for debugging purposes
 import vedo
@@ -50,18 +51,20 @@ def compute_reflection_clusters(reflected_signals):
         else:
             bins.append(Bin(line))
     
-    print("finished with the following bins")
+    # Return found clusters. TODO: transform to one-liner
+    clusters = []
     for bin in bins:
-        print(bin)
+        clusters.append(ReflectionCluster([line.reflected_signal for line in bin.lines]))
+    return clusters
 
     ### Debugging: Vizualise bins
-    room = vedo.Mesh(os.getcwd() + "/evaluation/testrooms/models/cube.obj").wireframe()
-    # For each bin, get its lines in a random color
-    visualization_lines = [bin.get_visualization_lines('#%06X' % randint(0, 0xFFFFFF)) for bin in bins]
-    axes = vedo.Axes(room, xrange = (-1.5, 1.5), yrange = (-1.5, 1.5), zrange = (-1.5, 1.5))
-    vedo.show(room, visualization_lines, axes,
-        camera={'pos': (5,5,5), 'viewup': (0,0,1), 'focal_point': (0,0,0)},
-    ).close()
+    # room = vedo.Mesh(os.getcwd() + "/evaluation/testrooms/models/cube.obj").wireframe()
+    # #For each bin, get its lines in a random color
+    # visualization_lines = [bin.get_visualization_lines('#%06X' % randint(0, 0xFFFFFF)) for bin in bins]
+    # axes = vedo.Axes(room, xrange = (-1.5, 1.5), yrange = (-1.5, 1.5), zrange = (-1.5, 1.5))
+    # vedo.show(room, visualization_lines, axes,
+        # camera={'pos': (5,5,5), 'viewup': (0,0,1), 'focal_point': (0,0,0)},
+    # ).close()
 
 ### Helper functions
 def invert_vector(vec):
@@ -77,11 +80,11 @@ def compute_cirular_segments_from_reflections(reflected_signals):
         vw = np.subtract(w, v)
         p0 = np.divide(np.multiply(vw, delta), np.linalg.norm(vw)**2)
         p1 = np.multiply(w, delta / 2)
-        segments.append([p0, p1])
+        segments.append(Segment(p0, p1, reflection))
     return segments
 
 def invert_circular_segments(circular_segments):
-    return [Line(invert_vector(segment[0]), invert_vector(segment[1]))  for segment in circular_segments]
+    return [Line(invert_vector(segment.p1), invert_vector(segment.p2), segment.reflected_signal)  for segment in circular_segments]
 
 def is_point_on_finite_line(line, point):
     line_to_point_direction = np.subtract(point, line.p1)
@@ -94,10 +97,18 @@ def is_point_on_finite_line(line, point):
         return True
 
 ### Classes
-class Line:
-    def __init__(self, p1, p2):
+# Dataclass
+class Segment:
+    def __init__(self, p1, p2, reflected_signal):
         self.p1 = p1
         self.p2 = p2
+        self.reflected_signal = reflected_signal
+
+class Line:
+    def __init__(self, p1, p2, reflected_signal):
+        self.p1 = p1
+        self.p2 = p2
+        self.reflected_signal = reflected_signal
         self.direction = np.subtract(self.p2, self.p1)
         # normalize direction
         self.direction = np.divide(self.direction, np.linalg.norm(self.direction))
