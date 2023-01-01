@@ -7,7 +7,7 @@
         {
             "name": "Python: Module",
             "type": "python",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
             "request": "launch",
             "module": "evaluation",
             "justMyCode": true

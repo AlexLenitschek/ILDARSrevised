@@ -9,6 +9,7 @@ numpy = "*"
 vedo = "*"
 scikit-learn = "*"
 pywavefront = "*"
+scipy = "*"
 
 [dev-packages]
 

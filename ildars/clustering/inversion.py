@@ -6,7 +6,7 @@ from random import randint
 from .cluster import ReflectionCluster
 
 ### Only for debugging purposes
-import vedo
+# import vedo
 import os
 
 ### Hard coded thresholds
