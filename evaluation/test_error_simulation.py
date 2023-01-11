@@ -4,7 +4,7 @@ import numpy as np
 
 from error_simulation import simulate_directional_error
 
-ITERATIONS = 100
+ITERATIONS = 1000
 CONCENTRATIONS = [
     {
         "CONCENTRATION":  3282.806,
@@ -61,7 +61,7 @@ def test_directional_error():
             random_vector = np.array([np.random.random() for _ in range(3)])
             error_vector = simulate_directional_error(random_vector, c["CONCENTRATION"])
             offsets.append(compute_angle(random_vector, error_vector))
-        print(c["CONCENTRATION"], np.average(offsets))
+        print("concentration:", c["CONCENTRATION"], "expected mean offset:", c["ANGLE"], "actual mean offset:", np.mean(offsets))
 
 if __name__ == "__main__":
     test_directional_error()
