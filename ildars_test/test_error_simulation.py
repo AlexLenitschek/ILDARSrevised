@@ -2,7 +2,7 @@
 # distributions, this file only prints expected, vs. actual std. deviation.
 import numpy as np
 
-from error_simulation import simulate_directional_error
+from evaluation.error_simulation import simulate_directional_error
 
 ITERATIONS = 1000
 CONCENTRATIONS = [
@@ -63,5 +63,8 @@ def test_directional_error():
             offsets.append(compute_angle(random_vector, error_vector))
         print("concentration:", c["CONCENTRATION"], "expected mean offset:", c["ANGLE"], "actual mean offset:", np.mean(offsets))
 
-if __name__ == "__main__":
+def main():
     test_directional_error()
+
+if __name__ == "__main__":
+    main()

@@ -6,3 +6,4 @@ The evaluation module contains all the "meta" code for simulating the measuremen
 Dependencies are managed using pipenv.
 * run `pipenv update` to install dependencies.
 * run `pipenv run python3 -m evaluation` to evaluate all implemented algorithms.
+* run `pipenv run python3 -m ildars_test` to evaluate all tests.

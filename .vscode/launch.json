@@ -5,11 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Module",
+            "name": "Run evaluation",
             "type": "python",
             "console": "internalConsole",
             "request": "launch",
             "module": "evaluation",
+            "justMyCode": true
+        },
+        {
+            "name": "Run tests",
+            "type": "python",
+            "console": "internalConsole",
+            "request": "launch",
+            "module": "ildars_test",
             "justMyCode": true
         }
     ]
