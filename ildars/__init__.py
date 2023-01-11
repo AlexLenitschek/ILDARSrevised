@@ -6,7 +6,7 @@ from enum import Enum
 from .direct_signal import DirectSignal
 from .reflected_signal import ReflectedSignal
 from . import clustering
-from . import wall_normal_vector
+from . import walls
 from . import localization
 
 
@@ -32,6 +32,6 @@ def run_ildars(
     reflection_clusters = clustering.compute_reflection_clusters(clustering_algorithm, reflected_signals)
     # Compute wall normal vectors. Wall normal vectors will be assigned to each reflected signal.
     for reflection_cluster in reflection_clusters: 
-        wall_normal_vector.compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster)
+        walls.compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster)
     # Compute and return sender positions
     return localization.compute_sender_positions(wall_selection_algorithm, localization_algorithm, reflection_clusters, direct_signals, reflected_signals)

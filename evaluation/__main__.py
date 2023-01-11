@@ -26,7 +26,7 @@ computed_sender_positions = ildars.run_ildars(
     direct_signals, 
     reflected_signals, 
     ildars.clustering.ClusteringAlgorithm.INVERSION, 
-    ildars.wall_normal_vector.WallNormalAlgorithm.ALL_PAIRS, 
+    ildars.walls.WallNormalAlgorithm.ALL_PAIRS, 
     ildars.localization.WallSelectionMethod.LARGEST_REFLECTION_CLUSTER,
     ildars.localization.LocalizationAlgorithm.WALL_DIRECTION)
 
