@@ -30,10 +30,6 @@ def run_ildars(
     """
     # Compute reflection clusters
     reflection_clusters = clustering.compute_reflection_clusters(clustering_algorithm, reflected_signals)
-
-    # Filter reflection clusters with less than 2 measurements
-    reflection_clusters = list(filter(lambda c: c.size > 1, reflection_clusters))
-
     # Compute wall normal vectors. Wall normal vectors will be assigned to each reflected signal.
     for reflection_cluster in reflection_clusters: 
         wall_normal_vector.compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster)
