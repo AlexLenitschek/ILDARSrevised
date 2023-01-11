@@ -20,13 +20,15 @@ def compute_sender_positions_largest_cluster(localization_algorithm, reflection_
 ### Compute sender positions using closed formulae
 def compute_sender_positions_for_given_wall(localization_algorithm, wall_normal_vector, reflected_signals):
 	if localization_algorithm is LocalizationAlgorithm.WALL_DIRECTION:
+		positions = []
 		for reflected_signal in reflected_signals:
 			distance = distance_wall_direction(
 				np.divide(wall_normal_vector,np.linalg.norm(wall_normal_vector)), 
 				reflected_signal.direct_signal.direction, 
 				reflected_signal.direction, 
 				reflected_signal.delta) 
-			return np.multiply(reflected_signal.direct_signal.direction, distance)
+			positions.append(np.multiply(reflected_signal.direct_signal.direction, distance))
+		return positions
 			
 	else:
 		raise NotImplementedError("Localization algorithm", localization_algorithm, "is either unknown or not implemented yet")
