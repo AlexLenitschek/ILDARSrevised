@@ -6,20 +6,18 @@ WallSelectionMethod = Enum('WallSelectionMethod', ['LARGEST_REFLECTION_CLUSTER',
 LocalizationAlgorithm = Enum('LocalizationAlgorithm', ['MAP_TO_NORMAL_VECTOR', 'CLOSEST_LINES', 'REFLECTION_GEOMETRY', 'WALL_DIRECTION'])
 
 def compute_sender_positions(wall_selection_algorithm, localization_algorithm, reflection_clusters, direct_signals, reflected_signals):
-    # Closest Lines Extended algorithm does not require a separate wall selection algorithm. So we need a special case for it
-    if wall_selection_algorithm is WallSelectionMethod.CLOSEST_LINES_EXTENDED:
-        # TODO: implement Closest Lines Extended
-        pass
-    if wall_selection_algorithm is WallSelectionMethod.LARGEST_REFLECTION_CLUSTER:
-        return compute_sender_positions_largest_cluster(localization_algorithm, reflection_clusters, reflected_signals)
+	if wall_selection_algorithm is WallSelectionMethod.LARGEST_REFLECTION_CLUSTER:
+		return compute_sender_positions_largest_cluster(localization_algorithm, reflection_clusters, reflected_signals)
+	else: 
+		raise NotImplementedError("Wall selection algorithm", wall_selection_algorithm, "is either unknown or not implemented yet.")
 
 ### Wall selection methods
 def compute_sender_positions_largest_cluster(localization_algorithm, reflection_clusters, reflected_signals):
 	assert len(reflection_clusters) > 0
-	# TODO: make lambda based filtering work somehow
 	largest_cluster = max(reflection_clusters, key=operator.attrgetter("size"))
 	return compute_sender_positions_for_given_wall(localization_algorithm, largest_cluster.wall_normal, reflected_signals)
 
+### Compute sender positions using closed formulae
 def compute_sender_positions_for_given_wall(localization_algorithm, wall_normal_vector, reflected_signals):
 	if localization_algorithm is LocalizationAlgorithm.WALL_DIRECTION:
 		return [distance_wall_direction(
