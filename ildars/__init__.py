@@ -5,18 +5,9 @@ from enum import Enum
 
 from .direct_signal import DirectSignal
 from .reflected_signal import ReflectedSignal
-from .clustering import inversion
-from .clustering import projection
+from . import clustering
 from . import wall_normal_vector
-
-ClusteringAlgorithm = Enum('ClusteringAlgorithm', [
-                           'INVERSION', 'GNOMONIC_PROJECTION'])
-WallNormalAlgorithm = Enum('WallNormalAlgorithm', [
-                           'ALL_PAIRS', 'LINEAR_ALL_PAIRS', 'DISJOINT_PAIRS', 'OVERLAPPING_PAIRS'])
-WallSelectionMethod = Enum('WallSelectionMethod', [
-                           'LARGEST_REFLECTION_CLUSTER', 'CLOSEST_LINES_EXTENDED'])
-LocalizationAlgorithm = Enum('LocalizationAlgorithm', [
-                             'MAP_TO_NORMAL_VECTOR', 'CLOSEST_LINES', 'REFLECTION_GEOMETRY', 'WALL_DIRECTION'])
+from . import localization
 
 
 def run_ildars(
@@ -38,51 +29,13 @@ def run_ildars(
         The computed sender positions
     """
     # Compute reflection clusters
-    reflection_clusters = compute_reflection_clusters(clustering_algorithm, reflected_signals)
-    # Debugging
-    # for index, cluster in enumerate(reflection_clusters):
-    #     print("cluster #", index)
-    #     for reflection in cluster:
-    #         print(" ", reflection)
+    reflection_clusters = clustering.compute_reflection_clusters(clustering_algorithm, reflected_signals)
+
+    # Filter reflection clusters with less than 2 measurements
+    reflection_clusters = list(filter(lambda c: c.size > 1, reflection_clusters))
+
     # Compute wall normal vectors. Wall normal vectors will be assigned to each reflected signal.
-    for reflection_cluster in reflection_clusters: compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster)
-    # Debugging
-    print("found wall normals:")
-    for i, cluster in enumerate(reflection_clusters):
-        print(i,": ", cluster.wall_normal)
+    for reflection_cluster in reflection_clusters: 
+        wall_normal_vector.compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster)
     # Compute and return sender positions
-    return compute_sender_positions(wall_selection_algorithm, localization_algorithm, reflection_clusters, direct_signals, reflected_signals)
-
-def compute_reflection_clusters(clustering_algorithm, reflected_signals):
-    if clustering_algorithm is ClusteringAlgorithm.INVERSION:
-        return inversion.compute_reflection_clusters(reflected_signals)
-    elif clustering_algorithm is ClusteringAlgorithm.GNOMONIC_PROJECTION:
-        return projection.compute_reflection_clusters(reflected_signals)
-    else:
-        raise NotImplementedError("Clustering algorithm", clustering_algorithm, "is not known or not implemented.")
-
-def compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster):
-    print("now computing wall vector")
-    if wall_normal_algorithm is WallNormalAlgorithm.ALL_PAIRS:
-        return wall_normal_vector.compute_wall_normal_vector_all_pairs(reflection_cluster)
-    elif wall_normal_algorithm is WallNormalAlgorithm.LINEAR_ALL_PAIRS:
-        return wall_normal_vector.compute_wall_normal_vector_all_pairs_linear(reflection_cluster)
-    elif wall_normal_algorithm is WallNormalAlgorithm.OVERLAPPING_PAIRS:
-        return wall_normal_vector.compute_wall_normal_vector_overlapping_pairs(reflection_cluster)
-    elif wall_normal_algorithm is WallNormalAlgorithm.DISJOINT_PAIRS:
-        return wall_normal_vector.compute_wall_normal_vector_disjoint_pairs(reflection_cluster)
-    else:
-        raise NotImplementedError("Wall normal vector computation algorithm", wall_normal_algorithm, "is not known.")
-
-def compute_sender_positions(wall_selection_algorithm, localization_algorithm, reflection_clusters, direct_signals, reflected_signals):
-    # Closest Lines Extended algorithm does not require a separate wall selection algorithm. So we need a special case for it
-    if wall_selection_algorithm is WallSelectionMethod.CLOSEST_LINES_EXTENDED:
-        # TODO: implement Closest Lines Extended
-        pass
-    else:
-        # TODO: implement "Wall" class that contains all the neccessary information
-        # i.e. the wall normal vector, the reflections that were assigned to this wall
-        # and also optionally contain a weighting which can be set during wall selection.
-        # Then for each direct signal (i.e. each sender), we need all the walls which are
-        # "available" for computing this senders position.
-        pass
+    return localization.compute_sender_positions(wall_selection_algorithm, localization_algorithm, reflection_clusters, direct_signals, reflected_signals)

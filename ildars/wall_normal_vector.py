@@ -1,11 +1,24 @@
+from enum import Enum
 import numpy as np
 ### Contains all methods for wall normal vector computation
 # Functions take as input a set of measurements (here we use the ReflectedSignal class)
 # it is assumend that all given measurements belong to the same wall.
+WallNormalAlgorithm = Enum('WallNormalAlgorithm', ['ALL_PAIRS', 'LINEAR_ALL_PAIRS', 'DISJOINT_PAIRS', 'OVERLAPPING_PAIRS'])
+
+def compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster):
+    if wall_normal_algorithm is WallNormalAlgorithm.ALL_PAIRS:
+        return compute_wall_normal_vector_all_pairs(reflection_cluster)
+    elif wall_normal_algorithm is WallNormalAlgorithm.LINEAR_ALL_PAIRS:
+        return compute_wall_normal_vector_all_pairs_linear(reflection_cluster)
+    elif wall_normal_algorithm is WallNormalAlgorithm.OVERLAPPING_PAIRS:
+        return compute_wall_normal_vector_overlapping_pairs(reflection_cluster)
+    elif wall_normal_algorithm is WallNormalAlgorithm.DISJOINT_PAIRS:
+        return compute_wall_normal_vector_disjoint_pairs(reflection_cluster)
+    else:
+        raise NotImplementedError("Wall normal vector computation algorithm", wall_normal_algorithm, "is not known.")
 
 def compute_wall_normal_vector_all_pairs(reflection_cluster):
     reflected_signals = reflection_cluster.reflected_signals
-    print("reflections:",[str(ref) for ref in reflected_signals])
     assert len(reflected_signals) > 1
     # Build "inner" cross porducts of each reflected signal, i.e. v x v
     inner_cross = [np.cross(sig.direction, sig.direct_signal.direction) for sig in reflected_signals]
