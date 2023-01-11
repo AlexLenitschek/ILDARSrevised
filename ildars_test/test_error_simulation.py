@@ -4,7 +4,7 @@ import numpy as np
 
 from evaluation.error_simulation import simulate_directional_error
 
-ITERATIONS = 1000
+ITERATIONS = 10000
 CONCENTRATIONS = [
     {"CONCENTRATION": 3282.806, "ANGLE": 1},
     {"CONCENTRATION": 820.702, "ANGLE": 2},

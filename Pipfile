@@ -5,11 +5,11 @@ name = "pypi"
 
 [packages]
 requests = "*"
-numpy = "*"
 vedo = "*"
 scikit-learn = "*"
 pywavefront = "*"
 scipy = "*"
+numpy = "==1.23.1"
 
 [dev-packages]
 flake8 = "*"
