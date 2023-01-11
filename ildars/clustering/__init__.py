@@ -2,7 +2,10 @@ from enum import Enum
 from . import inversion
 from . import projection
 
-ClusteringAlgorithm = Enum('ClusteringAlgorithm', ['INVERSION', 'GNOMONIC_PROJECTION'])
+ClusteringAlgorithm = Enum(
+    "ClusteringAlgorithm", ["INVERSION", "GNOMONIC_PROJECTION"]
+)
+
 
 def compute_reflection_clusters(clustering_algorithm, reflected_signals):
     clusters = None
@@ -11,5 +14,9 @@ def compute_reflection_clusters(clustering_algorithm, reflected_signals):
     elif clustering_algorithm is ClusteringAlgorithm.GNOMONIC_PROJECTION:
         clusters = projection.compute_reflection_clusters(reflected_signals)
     else:
-        raise NotImplementedError("Clustering algorithm", clustering_algorithm, "is not known or not implemented.")
+        raise NotImplementedError(
+            "Clustering algorithm",
+            clustering_algorithm,
+            "is not known or not implemented.",
+        )
     return list(filter(lambda c: c.size > 1, clusters))

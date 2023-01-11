@@ -2,74 +2,82 @@
 import numpy as np
 import math
 from enum import Enum
-from random import randint
 from .cluster import ReflectionCluster
 
-### Only for debugging purposes
-# import vedo
-import os
-
-### Hard coded thresholds
+# Hard coded thresholds
 # Maximum (absolute) distance betweet two line in the same bin
 LINE_TO_LINE_THRESHOLD = 0.3
 # Maximum (absolution) distance from the bin's center to each of its lines
 LINE_TO_BIN_THRESHOLD = 0.65
-# Bins with less than (median bin size * BIN_DISCARD_THRESHOLD) lines are dropped
+# Bins with less than median bin size * BIN_DISCARD_THRESHOLD lines are dropped
 BIN_DISCARD_RATIO = 0.5
 # Very small number
 EPSILON = 0.000000001
 
-# Main function of this file. Only this function will be called from other files
+
 def compute_reflection_clusters(reflected_signals):
     # Compute circular segments and it's inversions from measurements
-    circular_segments = compute_cirular_segments_from_reflections(reflected_signals)
+    circular_segments = compute_cirular_segments_from_reflections(
+        reflected_signals
+    )
     lines = invert_circular_segments(circular_segments)
-    
+
     # Initial bin
     bins = [Bin(lines[0])]
-    
+
     # Main Loop of Lines into Bins
     for line in lines[1:]:
         closest_single_line_bin = None
-        closest_single_line_dist = Distance(math.inf, DistanceType.LINE_TO_LINE_DISTANCE)
+        closest_single_line_dist = Distance(
+            math.inf, DistanceType.LINE_TO_LINE_DISTANCE
+        )
         closest_multi_line_bin = None
-        closest_multi_line_dist = Distance(math.inf, DistanceType.LINE_TO_BIN_DISTANCE)
+        closest_multi_line_dist = Distance(
+            math.inf, DistanceType.LINE_TO_BIN_DISTANCE
+        )
         # Find closest Bin
         for bin in bins:
             pass
             current_dist = bin.get_distance_to_line(line)
-            if current_dist.type == DistanceType.LINE_TO_LINE_DISTANCE and current_dist < closest_single_line_dist:
+            if (
+                current_dist.type == DistanceType.LINE_TO_LINE_DISTANCE
+                and current_dist < closest_single_line_dist
+            ):
                 closest_single_line_bin = bin
                 closest_single_line_dist = current_dist
-            elif current_dist.type == DistanceType.LINE_TO_BIN_DISTANCE and current_dist < closest_multi_line_dist:
+            elif (
+                current_dist.type == DistanceType.LINE_TO_BIN_DISTANCE
+                and current_dist < closest_multi_line_dist
+            ):
                 closest_multi_line_bin = bin
                 closest_multi_line_dist = current_dist
-        if closest_single_line_bin and closest_single_line_dist.distance < LINE_TO_LINE_THRESHOLD:
+        if (
+            closest_single_line_bin
+            and closest_single_line_dist.distance < LINE_TO_LINE_THRESHOLD
+        ):
             closest_single_line_bin.add_line(line)
-        elif closest_multi_line_bin and closest_multi_line_dist.distance < LINE_TO_BIN_THRESHOLD:
+        elif (
+            closest_multi_line_bin
+            and closest_multi_line_dist.distance < LINE_TO_BIN_THRESHOLD
+        ):
             closest_multi_line_bin.add_line(line)
         else:
             bins.append(Bin(line))
-    
+
     # Return found clusters. TODO: transform to one-liner
     clusters = []
     for bin in bins:
-        clusters.append(ReflectionCluster([line.reflected_signal for line in bin.lines]))
+        clusters.append(
+            ReflectionCluster([line.reflected_signal for line in bin.lines])
+        )
     return clusters
 
-    ### Debugging: Vizualise bins
-    # room = vedo.Mesh(os.getcwd() + "/evaluation/testrooms/models/cube.obj").wireframe()
-    # #For each bin, get its lines in a random color
-    # visualization_lines = [bin.get_visualization_lines('#%06X' % randint(0, 0xFFFFFF)) for bin in bins]
-    # axes = vedo.Axes(room, xrange = (-1.5, 1.5), yrange = (-1.5, 1.5), zrange = (-1.5, 1.5))
-    # vedo.show(room, visualization_lines, axes,
-        # camera={'pos': (5,5,5), 'viewup': (0,0,1), 'focal_point': (0,0,0)},
-    # ).close()
 
-### Helper functions
+# Helper functions
 def invert_vector(vec):
-    divisor = vec[0]**2 + vec[1]**2 + vec[2]**2
+    divisor = vec[0] ** 2 + vec[1] ** 2 + vec[2] ** 2
     return np.divide(vec, divisor)
+
 
 def compute_cirular_segments_from_reflections(reflected_signals):
     segments = []
@@ -78,31 +86,53 @@ def compute_cirular_segments_from_reflections(reflected_signals):
         w = reflection.direction
         delta = reflection.delta
         vw = np.subtract(w, v)
-        p0 = np.divide(np.multiply(vw, delta), np.linalg.norm(vw)**2)
+        p0 = np.divide(np.multiply(vw, delta), np.linalg.norm(vw) ** 2)
         p1 = np.multiply(w, delta / 2)
         segments.append(Segment(p0, p1, reflection))
     return segments
 
+
 def invert_circular_segments(circular_segments):
-    return [Line(invert_vector(segment.p1), invert_vector(segment.p2), segment.reflected_signal)  for segment in circular_segments]
+    return [
+        Line(
+            invert_vector(segment.p1),
+            invert_vector(segment.p2),
+            segment.reflected_signal,
+        )
+        for segment in circular_segments
+    ]
+
 
 def is_point_on_finite_line(line, point):
     line_to_point_direction = np.subtract(point, line.p1)
-    if np.dot(line.direction, line_to_point_direction) / (np.linalg.norm(line.direction) * np.linalg.norm(line_to_point_direction)) < 1 - EPSILON:
+    if (
+        np.dot(line.direction, line_to_point_direction)
+        / (
+            np.linalg.norm(line.direction)
+            * np.linalg.norm(line_to_point_direction)
+        )
+        < 1 - EPSILON
+    ):
         return False
     (minX, maxX) = sorted([line.p1[0], line.p2[0]])
     (minY, maxY) = sorted([line.p1[1], line.p2[1]])
     (minZ, maxZ) = sorted([line.p1[2], line.p2[2]])
-    if minX < point[0] < maxX and minY < point[1] < maxY and minZ < point[2] < maxZ:
+    if (
+        minX < point[0] < maxX
+        and minY < point[1] < maxY
+        and minZ < point[2] < maxZ
+    ):
         return True
 
-### Classes
+
+# Classes
 # Dataclass
 class Segment:
     def __init__(self, p1, p2, reflected_signal):
         self.p1 = p1
         self.p2 = p2
         self.reflected_signal = reflected_signal
+
 
 class Line:
     def __init__(self, p1, p2, reflected_signal):
@@ -111,14 +141,25 @@ class Line:
         self.reflected_signal = reflected_signal
         self.direction = np.subtract(self.p2, self.p1)
         # normalize direction
-        self.direction = np.divide(self.direction, np.linalg.norm(self.direction))
-    
+        self.direction = np.divide(
+            self.direction, np.linalg.norm(self.direction)
+        )
+
     def __str__(self):
-        return "Line with points: " + str(self.p1) + ", " + str(self.p2) + " and direction " + str(self.direction)
+        return (
+            "Line with points: "
+            + str(self.p1)
+            + ", "
+            + str(self.p2)
+            + " and direction "
+            + str(self.direction)
+        )
+
 
 class DistanceType(Enum):
     LINE_TO_LINE_DISTANCE = 1
     LINE_TO_BIN_DISTANCE = 2
+
 
 class Distance:
     def __init__(self, distance, type):
@@ -126,9 +167,10 @@ class Distance:
         self.type = type
 
     def __lt__(self, other_distance):
-        if (self.type != other_distance.type):
+        if self.type != other_distance.type:
             print("Warning, comparing distances of different types!")
         return self.distance < other_distance.distance
+
 
 class Bin:
     # default constructor, create bin with just one line (passed as an index)
@@ -139,31 +181,46 @@ class Bin:
     # Get the distance of a given line to the bin
     def get_distance_to_line(self, line):
         if len(self.lines) > 1:
-            line_projection = Bin.get_closest_point_one_line_to_point(line, self.center)
+            line_projection = Bin.get_closest_point_one_line_to_point(
+                line, self.center
+            )
             direction_to_line = np.subtract(line_projection, self.center)
-            return Distance(np.linalg.norm(direction_to_line), DistanceType.LINE_TO_BIN_DISTANCE)
+            return Distance(
+                np.linalg.norm(direction_to_line),
+                DistanceType.LINE_TO_BIN_DISTANCE,
+            )
 
         (pA, pB) = Bin.get_closest_points_on_lines(self.lines[0], line)
-        return Distance(np.linalg.norm(np.subtract(pB, pA)), DistanceType.LINE_TO_LINE_DISTANCE)
+        return Distance(
+            np.linalg.norm(np.subtract(pB, pA)),
+            DistanceType.LINE_TO_LINE_DISTANCE,
+        )
 
     # Add a given line to the bin
     def add_line(self, line):
         # recompute center
         if len(self.lines) < 2:
-            # bin only contained one line before, so we compute the closest point between two given Lines
+            # bin only contained one line before, so we compute the closest
+            # point between two given Lines
             (pA, pB) = Bin.get_closest_points_on_lines(self.lines[0], line)
             self.center = np.divide(np.add(pA, pB), 2)
         else:
             # adjust existing center
             num_lines_current = len(self.lines)
-            adjustment_amount = 1 - (num_lines_current / (num_lines_current + 1))
-            closest_point_on_new_line = Bin.get_closest_point_one_line_to_point(line, self.center)
-            adjustment_direction = np.subtract(closest_point_on_new_line, self.center)
+            adjustment_amount = 1 - (
+                num_lines_current / (num_lines_current + 1)
+            )
+            closest_point_on_new_line = (
+                Bin.get_closest_point_one_line_to_point(line, self.center)
+            )
+            adjustment_direction = np.subtract(
+                closest_point_on_new_line, self.center
+            )
             self.center += np.multiply(adjustment_direction, adjustment_amount)
         # add line
         self.lines.append(line)
 
-    ### Geometric computations
+    # Geometric computations
     @staticmethod
     def get_closest_point_one_line_to_point(line, point):
         line_to_center = np.subtract(point, line.p1)
@@ -174,13 +231,16 @@ class Bin:
             line_projection_length = 0
         elif line_projection_length > line_length:
             line_projection_length = line_length
-        return np.add(line.p1, np.multiply(line.direction, line_projection_length))
+        return np.add(
+            line.p1, np.multiply(line.direction, line_projection_length)
+        )
 
+    # Based on first answer from
+    # https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
     @staticmethod
     def get_closest_points_on_lines(line1, line2):
-        # Based on first answer from https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
-        pA = 0 # Closest point on line1 to line2
-        pB = 0 # Closest point on line2 to line1
+        pA = 0  # Closest point on line1 to line2
+        pB = 0  # Closest point on line2 to line1
         cross = np.cross(line1.direction, line2.direction)
         denominator = np.linalg.norm(cross)
         if denominator < EPSILON:
@@ -202,16 +262,32 @@ class Bin:
                     pA = line1.p2
                     pB = line2.p2
             else:
-                # Segments are parallel and overlapping. No unique solution exists.
-                center = np.divide(np.add(np.add(line1.p1, line1.p2), np.add(line2.p1, line2.p2)), 4)
+                # Segments are parallel and overlapping.
+                # No unique solution exists.
+                center = np.divide(
+                    np.add(
+                        np.add(line1.p1, line1.p2), np.add(line2.p1, line2.p2)
+                    ),
+                    4,
+                )
                 # compute projection on lines
                 line1_to_center = np.subtract(center, line1.p1)
-                line1_projection_length = np.dot(line1_to_center, line1.direction)
-                line1_projection = np.add(line1.p1, np.multiply(line1.direction, line1_projection_length))
+                line1_projection_length = np.dot(
+                    line1_to_center, line1.direction
+                )
+                line1_projection = np.add(
+                    line1.p1,
+                    np.multiply(line1.direction, line1_projection_length),
+                )
                 pA = line1_projection
                 line2_to_center = np.subtract(center, line2.p1)
-                line2_projection_length = np.dot(line2_to_center, line2.direction)
-                line2_projection = np.add(line2.p1, np.multiply(line2.direction, line2_projection_length))
+                line2_projection_length = np.dot(
+                    line2_to_center, line2.direction
+                )
+                line2_projection = np.add(
+                    line2.p1,
+                    np.multiply(line2.direction, line2_projection_length),
+                )
                 pB = line2_projection
 
         else:
@@ -220,7 +296,7 @@ class Bin:
 
             detA = np.linalg.det([t, line2.direction, cross])
             detB = np.linalg.det([t, line1.direction, cross])
-            
+
             t0 = detA / denominator
             t1 = detB / denominator
 
@@ -233,7 +309,7 @@ class Bin:
                 pA = line1.p1
             elif t0 > np.linalg.norm(np.subtract(line1.p2, line1.p1)):
                 pA = line1.p2
-            
+
             if t0 < 0:
                 pB = line2.p1
             elif t0 > np.linalg.norm(np.subtract(line2.p2, line2.p1)):
@@ -255,13 +331,15 @@ class Bin:
                     dot = np.linalg.norm(np.subtract(line1.p2, line1.p1))
                 pA = line1.p1 + np.multiply(line1.direction, dot)
         return (pA, pB)
-    
+
     def __str__(self):
-        result = "Bin with " + str(len(self.lines)) + " lines and center at " + str(self.center) + " lines:\n"
+        result = (
+            "Bin with "
+            + str(len(self.lines))
+            + " lines and center at "
+            + str(self.center)
+            + " lines:\n"
+        )
         for i, line in enumerate(self.lines):
             result += str(i) + ": " + str(line) + "\n"
         return result
-    
-    # for debugging visualization
-    def get_visualization_lines(self, color):
-        return [vedo.Line(line.p1, line.p2, c=color) for line in self.lines]
