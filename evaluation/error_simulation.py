@@ -22,6 +22,11 @@ def simulate_reflection_error(
 
 
 def simulate_directional_error(vector, von_mises_error):
+    # Completely new function based on
+    # https://math.stackexchange.com/questions/4343044/rotate-vector-by-a-random-little-amount
+    # v = np.divide(vector, np.linalg.norm(vector))
+    # Find orthonormal basis including
+
     orthogonal_vector = random_orthogonal_vector(vector)
     if von_mises_error > 0:
         random_angle = vonmises_line(von_mises_error).rvs()
