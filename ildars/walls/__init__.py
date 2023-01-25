@@ -41,13 +41,11 @@ def compute_wall_normal_vector_all_pairs(reflection_cluster):
     inv_normal = np.multiply(normal, -1)
     # Get the "correct" direction of normal, according to v direction.
     pos_dist = get_angular_dist(
-        normal, reflected_signals[0].direct_signal.direction
-    ) + get_angular_dist(normal, reflected_signals[1].direct_signal.direction)
+        normal, reflected_signals[0].direction
+    ) + get_angular_dist(normal, reflected_signals[1].direction)
     neg_dist = get_angular_dist(
-        inv_normal, reflected_signals[0].direct_signal.direction
-    ) + get_angular_dist(
-        inv_normal, reflected_signals[1].direct_signal.direction
-    )
+        inv_normal, reflected_signals[0].direction
+    ) + get_angular_dist(inv_normal, reflected_signals[1].direction)
     # Flip normal if its inversion is closer to the wall, according to v
     # vectors from the first two measurements.
     # TODO: wouldn't this be more accurate if we average over all v vectors
