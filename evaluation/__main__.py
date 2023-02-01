@@ -3,7 +3,7 @@ import random
 import ildars
 from . import testrooms
 from . import signal_simulation
-from .visualization import Visualizer
+from .renderer import Renderer
 
 # Error setup
 VON_MISES_CONCENTRATION = 1  # concentration of 1 lead so uniform distribution
@@ -52,6 +52,6 @@ def new_experiment():
     return clusters, pos_orig, pos_comp
 
 
-visualizer = Visualizer(
+renderer = Renderer(
     receiver_position, new_experiment, clusters, pos_orig, pos_comp
 )

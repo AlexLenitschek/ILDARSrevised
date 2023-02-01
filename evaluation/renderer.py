@@ -2,7 +2,7 @@ import os
 import vedo
 
 
-class Visualizer:
+class Renderer:
     def __init__(
         self,
         pos_receiver,
@@ -41,7 +41,7 @@ class Visualizer:
             self.mesh_axes,
             self.mesh_clusters,
             self.mesh_normals,
-            self.mesh_pos_comp,
+            self.mesh_pos_orig,
             self.mesh_pos_comp,
         )
         self.plt.show(
@@ -60,7 +60,7 @@ class Visualizer:
         self.plt.remove(
             self.mesh_clusters,
             self.mesh_normals,
-            self.mesh_pos_comp,
+            self.mesh_pos_orig,
             self.mesh_pos_comp,
         )
         self.generate_dynamic_meshes(clusters, pos_orig, pos_comp)
@@ -155,4 +155,3 @@ class Visualizer:
             pos_o.alpha(1)
         for pos_c in self.mesh_pos_comp:
             pos_c.alpha(1)
-        print("showing positions")
