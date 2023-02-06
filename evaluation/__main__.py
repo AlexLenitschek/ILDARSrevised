@@ -10,7 +10,7 @@ VON_MISES_CONCENTRATION = 1  # concentration of 1 lead so uniform distribution
 DELTA_ERROR = 0.1  # 10cm standard deviation
 WALL_ERROR = 0  # no wrongly assigned reflections
 
-receiver_position = (0.1, 0.1, 0.1)
+receiver_position = (0.1, 0.2, 0.3)
 
 
 def run_experiment():
