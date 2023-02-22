@@ -19,23 +19,23 @@ wall_error = 0.5 # 5% of reflection will wrongly be assigned
 
     [algorithms.clustering]
     inversion = true
-    projection = true
+    projection = false
 
     [algorithms.wall_normal]
     all_pairs = true
-    linear_all_pairs = true
-    disjoint_pairs = true
-    overlapping_pairs = true
+    linear_all_pairs = false
+    disjoint_pairs = false
+    overlapping_pairs = false
 
     [algorithms.wall_selection]
     largest_cluster = true
-    narrowest_cluster = true
-    unweighted_average = true
-    weighted_average_wall_distance = true
+    narrowest_cluster = false
+    unweighted_average = false
+    weighted_average_wall_distance = false
 
     [algorithms.localization]
     wall_direction = true
-    map_to_wall_normal = true
-    reflection_geometry = true
-    closest_lines = true
-    closest_lines_extended = true
+    map_to_wall_normal = false
+    reflection_geometry = false
+    closest_lines = false
+    closest_lines_extended = false
