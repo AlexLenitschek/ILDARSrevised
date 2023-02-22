@@ -58,25 +58,23 @@ def compute_sender_positions_largest_cluster(
 
 # Compute sender positions using closed formulae
 def compute_sender_positions_for_given_wall(
-    localization_algorithm, wall_normal_vector, reflected_signals
+    localization_algorithm, wall_nv, reflected_signals
 ):
     if localization_algorithm is LocalizationAlgorithm.WALL_DIRECTION:
         positions = []
-        for reflected_signal in reflected_signals:
+        for ref_sig in reflected_signals:
             distance = distance_wall_direction(
-                np.divide(
-                    wall_normal_vector, np.linalg.norm(wall_normal_vector)
-                ),
-                reflected_signal.direct_signal.direction,
-                reflected_signal.direction,
-                reflected_signal.delta,
+                np.divide(wall_nv, np.linalg.norm(wall_nv)),
+                ref_sig.direct_signal.direction,
+                ref_sig.direction,
+                ref_sig.delta,
             )
             positions.append(
                 {
                     "computed": np.multiply(
-                        reflected_signal.direct_signal.direction, distance
+                        ref_sig.direct_signal.direction, distance
                     ),
-                    "original": reflected_signal.original_sender_position,
+                    "original": ref_sig.original_sender_position,
                 }
             )
         return positions

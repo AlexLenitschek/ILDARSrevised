@@ -35,6 +35,7 @@ receiver_position = np.array(
 )
 
 algo_sel = read_algorithm_selection_from_settings(settings)
+print("algorithm selection:", algo_sel)
 
 
 # Generator function for selected algorithms, so we can easily iterator over
@@ -106,10 +107,10 @@ def run_experiment(algo_conf, iterations=1):
         new_clusters, new_positions = ildars.run_ildars(
             direct_signals,
             reflected_signals,
-            ildars.clustering.ClusteringAlgorithm.INVERSION,
-            ildars.walls.WallNormalAlgorithm.ALL_PAIRS,
-            ildars.localization.WallSelectionMethod.LARGEST_REFLECTION_CLUSTER,
-            ildars.localization.LocalizationAlgorithm.WALL_DIRECTION,
+            algo_conf[STR_CLUSTERING],
+            algo_conf[STR_WALL_NORMAL],
+            algo_conf[STR_WALL_SELECTION],
+            algo_conf[STR_LOCALIZATION],
         )
         positions += new_positions
         current_iteration += 1
