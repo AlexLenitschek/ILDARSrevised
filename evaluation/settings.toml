@@ -1,0 +1,41 @@
+# Configure error setup and specify algorithms to run
+
+[general]
+# Visualization will be generated iff. iterations are set to 1
+iterations = 1
+random_receiver = false
+    
+    [general.receiver_position]
+    x = 0.1
+    y = 0.2
+    z = 0.3
+
+[error]
+von_mises_concentration = 1 # uniformly random
+delta_error = 0.1 # 10cm standard deviation
+wall_error = 0.5 # 5% of reflection will wrongly be assigned
+
+[algorithms]
+
+    [algorithms.clustering]
+    inversion = true
+    projection = true
+
+    [algorithms.wall_normal]
+    all_pairs = true
+    linear_all_pairs = true
+    disjoint_pairs = true
+    overlapping_pairs = true
+
+    [algorithms.wall_selection]
+    largest_cluster = true
+    narrowest_cluster = true
+    unweighted_average = true
+    weighted_average_wall_distance = true
+
+    [algorithms.localization]
+    wall_direction = true
+    map_to_wall_normal = true
+    reflection_geometry = true
+    closest_lines = true
+    closest_lines_extended = true

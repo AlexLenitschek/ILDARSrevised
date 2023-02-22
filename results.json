@@ -1,0 +1,1 @@
+{"{'clustering': <ClusteringAlgorithm.INVERSION: 1>, 'wall_normal': <WallNormalAlgorithm.ALL_PAIRS: 1>, 'wall_selection': <WallSelectionMethod.LARGEST_REFLECTION_CLUSTER: 1>, 'localization': <LocalizationAlgorithm.WALL_DIRECTION: 4>}": [{"computed": 

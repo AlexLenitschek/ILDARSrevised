@@ -10,13 +10,14 @@ scikit-learn = "*"
 pywavefront = "*"
 scipy = "*"
 numpy = "==1.23.1"
+toml = "*"
 
 [dev-packages]
 flake8 = "*"
 black = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.11"
 
 [pipenv]
 allow_prereleases = true

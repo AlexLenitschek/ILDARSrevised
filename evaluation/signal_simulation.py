@@ -84,6 +84,7 @@ def generate_measurements(receiver_position, sender_positions, room):
                     direct_signal,
                     reflected_signal_length - direct_signal_length,
                     reflection_index,
+                    np.array(sender_position),
                 )
             )
             reflection_index += 1

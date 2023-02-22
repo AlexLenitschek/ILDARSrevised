@@ -12,12 +12,15 @@ class ReflectedSignal:
     respective time difference between receiving the two signals.
     """
 
-    def __init__(self, direction, direct_signal, delta, index):
+    def __init__(
+        self, direction, direct_signal, delta, index, original_sender_position
+    ):
         self.direction = direction
         self.direct_signal = direct_signal
         self.delta = delta
         # Index is only here for debugging purposes
         self.index = index
+        self.original_sender_position = original_sender_position
 
     def __str__(self):
         return "Reflection: #" + str(self.index)

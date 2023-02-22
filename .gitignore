@@ -2,6 +2,9 @@
 # vs code settings
 settings.json
 
+# generated experiment results
+results
+
 ### Default .gitignore for python. Taken form https://github.com/github/gitignore/blob/main/Python.gitignore
 
 # Byte-compiled / optimized / DLL files

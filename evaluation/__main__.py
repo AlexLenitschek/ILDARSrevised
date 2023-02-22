@@ -1,57 +1,156 @@
 import random
+import toml
+import csv
+from pathlib import Path
+import numpy as np
 
+from .experiment_setup_parser import read_algorithm_selection_from_settings
 import ildars
 from . import testrooms
 from . import signal_simulation
 from .renderer import Renderer
 
-# Error setup
-VON_MISES_CONCENTRATION = 1  # concentration of 1 lead so uniform distribution
-DELTA_ERROR = 0.1  # 10cm standard deviation
-WALL_ERROR = 0  # no wrongly assigned reflections
+# Read experiment setup from settings.toml file
+settings_file = open("evaluation/settings.toml", "r")
+settings = toml.load(settings_file)
 
-receiver_position = (0.1, 0.1, 0.1)
+# Some constants for often used strings
+STR_CLUSTERING = "clustering"
+STR_WALL_NORMAL = "wall_normal"
+STR_WALL_SELECTION = "wall_selection"
+STR_LOCALIZATION = "localization"
 
+VON_MISES_CONCENTRATION = settings["error"]["von_mises_concentration"]
+DELTA_ERROR = settings["error"]["delta_error"]
+WALL_ERROR = settings["error"]["wall_error"]
 
-def run_experiment():
-    # random sender positions
-    sender_positions = [
-        (random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(-1, 1))
-        for i in range(10)
+NUM_ITERATIONS = settings["general"]["iterations"]
+
+receiver_position = np.array(
+    [
+        settings["general"]["receiver_position"]["x"],
+        settings["general"]["receiver_position"]["y"],
+        settings["general"]["receiver_position"]["z"],
     ]
-
-    (
-        direct_signals,
-        reflected_signals,
-    ) = signal_simulation.generate_measurements(
-        receiver_position, sender_positions, testrooms.CUBE
-    )
-    # TODO: fix and use error simulation
-    # reflected_signals = error_simulation.simulate_reflection_error(
-    #     reflected_signals, VON_MISES_CONCENTRATION, DELTA_ERROR, WALL_ERROR
-    # )
-
-    # For now: hardcoded inversion based clustering. In the future, evaulate
-    # all implemented algorithms of the ILDARS pipeline here
-    clusters, positions = ildars.run_ildars(
-        direct_signals,
-        reflected_signals,
-        ildars.clustering.ClusteringAlgorithm.INVERSION,
-        ildars.walls.WallNormalAlgorithm.ALL_PAIRS,
-        ildars.localization.WallSelectionMethod.LARGEST_REFLECTION_CLUSTER,
-        ildars.localization.LocalizationAlgorithm.WALL_DIRECTION,
-    )
-    return sender_positions, clusters, positions
-
-
-pos_orig, clusters, pos_comp = run_experiment()
-
-
-def new_experiment():
-    pos_orig, clusters, pos_comp = run_experiment()
-    return clusters, pos_orig, pos_comp
-
-
-renderer = Renderer(
-    receiver_position, new_experiment, clusters, pos_orig, pos_comp
 )
+
+algo_sel = read_algorithm_selection_from_settings(settings)
+
+
+# Generator function for selected algorithms, so we can easily iterator over
+# all possible configurations
+def algo_configurations(algo_sel):
+    i_clustering = 0
+    i_wall_normal = 0
+    i_wall_selection = 0
+    i_localization = 0
+    while (
+        i_clustering < len(algo_sel[STR_CLUSTERING])
+        and i_wall_normal < len(algo_sel[STR_WALL_NORMAL])
+        and i_wall_selection < len(algo_sel[STR_WALL_SELECTION])
+        and i_localization < len(algo_sel[STR_LOCALIZATION])
+    ):
+        yield {
+            STR_CLUSTERING: algo_sel[STR_CLUSTERING][i_clustering],
+            STR_WALL_NORMAL: algo_sel[STR_WALL_NORMAL][i_wall_normal],
+            STR_WALL_SELECTION: algo_sel[STR_WALL_SELECTION][i_wall_selection],
+            STR_LOCALIZATION: algo_sel[STR_LOCALIZATION][i_localization],
+        }
+        # increase indices
+        if i_localization < len(algo_sel[STR_LOCALIZATION]) - 1:
+            i_localization += 1
+        elif i_wall_selection < len(algo_sel[STR_WALL_SELECTION]) - 1:
+            i_localization = 0
+            i_wall_selection += 1
+        elif i_wall_normal < len(algo_sel[STR_WALL_NORMAL]) - 1:
+            i_localization = 0
+            i_wall_selection = 0
+            i_wall_normal += 1
+        else:
+            i_localization = 0
+            i_wall_selection = 0
+            i_wall_normal = 0
+            i_clustering += 1
+
+
+def run_experiment(algo_conf, iterations=1):
+    current_iteration = 1
+    positions = []
+    while current_iteration <= iterations:
+        print("Selected configuration:")
+        print("  Clustering algorithm:", algo_conf[STR_CLUSTERING])
+        print("  Wall normal algorithm:", algo_conf[STR_WALL_NORMAL])
+        print("  Wall selection algorithm:", algo_conf[STR_WALL_SELECTION])
+        print("  Localization algorithm:", algo_conf[STR_LOCALIZATION])
+        print("  iteration:", current_iteration)
+        # random sender positions
+        sender_positions = [
+            (
+                random.uniform(-1, 1),
+                random.uniform(-1, 1),
+                random.uniform(-1, 1),
+            )
+            for i in range(10)
+        ]
+
+        (
+            direct_signals,
+            reflected_signals,
+        ) = signal_simulation.generate_measurements(
+            receiver_position, sender_positions, testrooms.CUBE
+        )
+        # TODO: fix and use error simulation
+        # reflected_signals = error_simulation.simulate_reflection_error(
+        #     reflected_signals, VON_MISES_CONCENTRATION, DELTA_ERROR, WALL_ERROR
+        # )
+        new_clusters, new_positions = ildars.run_ildars(
+            direct_signals,
+            reflected_signals,
+            ildars.clustering.ClusteringAlgorithm.INVERSION,
+            ildars.walls.WallNormalAlgorithm.ALL_PAIRS,
+            ildars.localization.WallSelectionMethod.LARGEST_REFLECTION_CLUSTER,
+            ildars.localization.LocalizationAlgorithm.WALL_DIRECTION,
+        )
+        positions += new_positions
+        current_iteration += 1
+    return positions
+
+
+for algo_conf in algo_configurations(algo_sel):
+    positions = run_experiment(algo_conf, NUM_ITERATIONS)
+    name_clustering = str(algo_conf[STR_CLUSTERING]).split(".")[-1]
+    name_wall_normal = str(algo_conf[STR_WALL_NORMAL]).split(".")[-1]
+    name_wall_selection = str(algo_conf[STR_WALL_SELECTION]).split(".")[-1]
+    name_localization = str(algo_conf[STR_LOCALIZATION]).split(".")[-1]
+    results_path = (
+        f"results/{name_clustering}-{name_wall_normal}-{name_wall_selection}-{name_localization}.csv"
+    ).lower()
+    Path("results").mkdir(parents=True, exist_ok=True)
+    with open(results_path, "w", newline="") as file:
+        csvwriter = csv.writer(
+            file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+        )
+        csvwriter.writerow(
+            ["computed position", "original position", "offset"]
+        )
+        for position in positions:
+            csvwriter.writerow(
+                [
+                    str(position["computed"]),
+                    str(position["original"]),
+                    np.linalg.norm(
+                        position["computed"] - position["original"]
+                    ),
+                ]
+            )
+
+
+# Visualization turned off for now
+# def new_experiment():
+#     pos_orig, clusters, pos_comp = run_experiment()
+#     return clusters, pos_orig, pos_comp
+
+
+# renderer = Renderer(
+#     receiver_position, new_experiment, clusters, pos_orig, pos_comp
+# )
