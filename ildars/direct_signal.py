@@ -1,14 +1,16 @@
 """
 Class that represents direct signals.
 """
+import numpy as np
 
 
 class DirectSignal:
     """
     Class for representing direct signals. For now only saves the direction.
     """
+
     def __init__(self, direction):
-        self.direction = direction
+        self.direction = np.array(direction)
         self.reflected_signals = []
 
     def add_reflected_signal(self, reflected_signal):
