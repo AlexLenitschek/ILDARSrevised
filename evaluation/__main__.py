@@ -3,6 +3,7 @@ import toml
 import csv
 from pathlib import Path
 import numpy as np
+import datetime
 
 from .experiment_setup_parser import read_algorithm_selection_from_settings
 import ildars
@@ -123,11 +124,24 @@ for algo_conf in algo_configurations(algo_sel):
     name_wall_normal = str(algo_conf[STR_WALL_NORMAL]).split(".")[-1]
     name_wall_selection = str(algo_conf[STR_WALL_SELECTION]).split(".")[-1]
     name_localization = str(algo_conf[STR_LOCALIZATION]).split(".")[-1]
-    results_path = (
-        f"results/{name_clustering}-{name_wall_normal}-{name_wall_selection}-{name_localization}.csv"
+    res_dir = "/".join(
+        [
+            "results",
+            str(
+                datetime.datetime.now()
+                .replace(second=0, microsecond=0)
+                .isoformat()
+            ),
+        ]
     ).lower()
-    Path("results").mkdir(parents=True, exist_ok=True)
-    with open(results_path, "w", newline="") as file:
+    res_name = (
+        f"{name_clustering}-"
+        + f"{name_wall_normal}-"
+        + f"{name_wall_selection}-"
+        + f"{name_localization}.csv"
+    )
+    Path(res_dir).mkdir(parents=True, exist_ok=True)
+    with open(f"{res_dir}/{res_name}", "w", newline="") as file:
         csvwriter = csv.writer(
             file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
         )

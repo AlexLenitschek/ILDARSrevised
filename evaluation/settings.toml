@@ -18,8 +18,8 @@ wall_error = 0.5 # 5% of reflection will wrongly be assigned
 [algorithms]
 
     [algorithms.clustering]
-    inversion = true
-    projection = false
+    inversion = false
+    projection = true
 
     [algorithms.wall_normal]
     all_pairs = true
