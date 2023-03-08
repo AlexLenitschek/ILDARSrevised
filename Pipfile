@@ -11,6 +11,7 @@ pywavefront = "*"
 scipy = "*"
 numpy = "==1.23.1"
 toml = "*"
+scikit-spatial = "*"
 
 [dev-packages]
 flake8 = "*"
