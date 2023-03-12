@@ -1,7 +1,16 @@
+import itertools
+
 import numpy as np
 
 
-def compute_direction_all_pairs(reflection_cluster):
+STR_ALL = "all"
+STR_DISJOINT = "disjoint"
+STR_OVERLAPPING = "overlapping"
+
+
+def compute_direction_from_pairs(
+    reflection_cluster, pair_selection_method=STR_ALL
+):
     reflected_signals = reflection_cluster.reflected_signals
     assert len(reflected_signals) > 1
     # Build "inner" cross porducts of each reflected signal, i.e. v x v
@@ -26,21 +35,17 @@ def compute_direction_all_pairs(reflection_cluster):
     if neg_dist < pos_dist:
         normal = inv_normal
     # Main Loop
-    for i, outer in enumerate(inner_cross):
-        for j, inner in enumerate(inner_cross[i + 1 :], i + 1):
-            # Skip the combination of 1st and 2nd reflection, as they were
-            # used for initialization
-            if i == 0 and j == 1:
-                continue
-            partial_normal = np.cross(outer, inner)
-            inv_partial_normal = np.multiply(partial_normal, -1)
-            if get_angular_dist(inv_partial_normal, normal) < get_angular_dist(
-                partial_normal, normal
-            ):
-                partial_normal = inv_partial_normal
-            # TODO: normal is normalized in each step in orignal vector. Is
-            # that really neccessary?
-            normal += partial_normal
+    pairs = get_pairs(inner_cross, pair_selection_method)
+    for pair in pairs:
+        outer = pair[0]
+        inner = pair[1]
+        partial_normal = np.cross(outer, inner)
+        inv_partial_normal = np.multiply(partial_normal, -1)
+        if get_angular_dist(inv_partial_normal, normal) < get_angular_dist(
+            partial_normal, normal
+        ):
+            partial_normal = inv_partial_normal
+        normal += partial_normal
 
     normal = np.divide(normal, np.linalg.norm(normal))
     for reflected_signal in reflection_cluster.reflected_signals:
@@ -48,25 +53,21 @@ def compute_direction_all_pairs(reflection_cluster):
     reflection_cluster.wall_normal = normal
 
 
+def get_pairs(elements, method):
+    if method == STR_ALL:
+        return list(itertools.combinations(elements, 2))[1:]
+    if method == STR_OVERLAPPING:
+        return itertools.pairwise(elements[1:])
+    if method == STR_DISJOINT:
+        pairs = itertools.pairwise(elements[1:])
+        return itertools.islice(pairs, None, None, 2)
+
+
 def compute_direction_all_pairs_linear(reflected_signals):
     # TODO: implement
     # TODO: assign computed wall normal vector to each reflected signal, i.e
     # reflected_signal.wall_normal_vector = computed_wall_normal_vector
     print("Linear All Pairs not yet implemented")
-
-
-def compute_direction_overlapping_pairs(reflected_signals):
-    # TODO: implement
-    # TODO: assign computed wall normal vector to each reflected signal, i.e
-    # reflected_signal.wall_normal_vector = computed_wall_normal_vector
-    print("Overlapping Pairs not yet implemented")
-
-
-def compute_direction_disjoint_pairs(reflected_signals):
-    # TODO: implement
-    # TODO: assign computed wall normal vector to each reflected signal, i.e
-    # reflected_signal.wall_normal_vector = computed_wall_normal_vector
-    print("Disjoint Pairs not yet implemented")
 
 
 # Helper function: Get the relative angular distance between two vetors.

@@ -2,10 +2,11 @@ from enum import Enum
 import numpy as np
 
 from .direction import (
-    compute_direction_all_pairs,
+    compute_direction_from_pairs,
     compute_direction_all_pairs_linear,
-    compute_direction_disjoint_pairs,
-    compute_direction_overlapping_pairs,
+    STR_ALL,
+    STR_DISJOINT,
+    STR_OVERLAPPING,
 )
 from .distance import compute_distance
 
@@ -21,13 +22,13 @@ WallNormalAlgorithm = Enum(
 
 def compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster):
     if wall_normal_algorithm is WallNormalAlgorithm.ALL_PAIRS:
-        compute_direction_all_pairs(reflection_cluster)
+        compute_direction_from_pairs(reflection_cluster, STR_ALL)
     elif wall_normal_algorithm is WallNormalAlgorithm.LINEAR_ALL_PAIRS:
         compute_direction_all_pairs_linear(reflection_cluster)
     elif wall_normal_algorithm is WallNormalAlgorithm.OVERLAPPING_PAIRS:
-        compute_direction_overlapping_pairs(reflection_cluster)
+        compute_direction_from_pairs(reflection_cluster, STR_OVERLAPPING)
     elif wall_normal_algorithm is WallNormalAlgorithm.DISJOINT_PAIRS:
-        compute_direction_disjoint_pairs(reflection_cluster)
+        compute_direction_from_pairs(reflection_cluster, STR_DISJOINT)
     else:
         raise NotImplementedError(
             "Wall normal vector computation algorithm",
