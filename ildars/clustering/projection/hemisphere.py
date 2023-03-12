@@ -1,10 +1,11 @@
+import itertools
 import numpy as np
 import scipy as sp
-from skspatial.objects import Plane, Line, Circle, Point
+import networkx as nx
+from skspatial.objects import Plane, Line, Circle
 
-# only for debuggin
-import matplotlib.pyplot as plt
-from skspatial.plotting import plot_2d
+# only for debugging
+import ildars_visualization.gnomonic_projection as viz
 
 from . import util
 
@@ -13,6 +14,11 @@ from . import util
 # 12 hemispheres to always be true
 HEMI_WIDTH_DEGREE = 37.4
 COS_C_THRESHOLD = np.cos(np.radians(HEMI_WIDTH_DEGREE))
+
+# Strings used for dictionaries
+STR_START = "start"
+STR_END = "end"
+STR_ARC = "arc"
 
 
 class Hemisphere:
@@ -36,6 +42,35 @@ class Hemisphere:
 
         if start_cos_c <= COS_C_THRESHOLD:
             new_start = self.clip_vector_to_hemisphere(arc.start, arc.end)
+            start_lat_lon = util.carth_to_lat_lon(new_start)
+            start_cos_c = util.get_cos_c(start_lat_lon, hemi_lat_lon)
+        elif end_cos_c <= COS_C_THRESHOLD:
+            new_end = self.clip_vector_to_hemisphere(arc.start, arc.end)
+            end_lat_lon = util.carth_to_lat_lon(new_end)
+            end_cos_c = util.get_cos_c(end_lat_lon, hemi_lat_lon)
+
+        self.lines.append(
+            {
+                STR_START: util.lat_lon_to_gnomonic(
+                    start_lat_lon, hemi_lat_lon, start_cos_c
+                ),
+                STR_END: util.lat_lon_to_gnomonic(
+                    end_lat_lon, hemi_lat_lon, end_cos_c
+                ),
+                STR_ARC: arc,
+            }
+            # {
+            #     "start": util.lat_lon_to_gnomonic(
+            #         start_lat_lon, hemi_lat_lon, start_cos_c
+            #     ),
+            #     "end": util.lat_lon_to_gnomonic(
+            #         end_lat_lon, hemi_lat_lon, end_cos_c
+            #     ),
+            #     # We also need to store a reference to the respective
+            #     # reflected signal
+            #     "reflection": arc.reflected_signal,
+            # }
+        )
 
     # given two vectors v_out, v_in where v_out is outside the hemisphere and
     # v_in is inside, adjust v_in s.t. it also lands on the hemisphere without
@@ -78,11 +113,11 @@ class Hemisphere:
         # To do so, we transform our original start and endpoint of our arc
         # and compare the polar coordinates
         arc_start_2d = mat_std_circ.dot(util.normalize(v_out))[:-1]
-        arc_end_2d = np.array([1, 0])  # we chose v_in as x-axis for our space
+        # arc_end_2d = np.array([1, 0])  # we chose v_in as x-axis for our space
         # convert all points to polar coordinates, but ignoring the radius,
         # which is 1 for all points
         arc_start_phi = np.arctan2(arc_start_2d[1], arc_start_2d[0])
-        arc_end_phi = np.arctan2(arc_end_2d[1], arc_end_2d[0])
+        # arc_end_phi = np.arctan2(arc_end_2d[1], arc_end_2d[0])
         p1_phi = np.arctan2(intersections[0][1], intersections[0][0])
         p2_phi = np.arctan2(intersections[1][1], intersections[1][0])
         # We need to differenciate between the two halves of the circle to
@@ -106,30 +141,27 @@ class Hemisphere:
         solution = intersections[solution_index].to_array()
         solution = mat_circ_std.dot(np.array([solution[0], solution[1], 0]))
 
-        # for visualization, plot everything
-        _, ax = plt.subplots()
-        circ_2d.plot_2d(ax, fill=False)
-        line_2d.plot_2d(ax, t_2=5, c="k")
-        intersections[solution_index].plot_2d(ax, s=100, c="g")
-        intersections[np.abs(solution_index - 1)].plot_2d(ax, s=100, c="r")
-        Point(arc_start_2d).plot_2d(ax, s=100, c="b")
-        Point(arc_end_2d).plot_2d(ax, s=100, c="b")
-        ax.set_xlim(-2, 2)
-        ax.set_ylim(-2, 2)
-        plt.show()
-        print(
-            "old cos_c:",
-            util.get_cos_c(
-                util.carth_to_lat_lon(v_out),
-                util.carth_to_lat_lon(self.center),
-            ),
-            "new cos_c:",
-            util.get_cos_c(
-                util.carth_to_lat_lon(solution),
-                util.carth_to_lat_lon(self.center),
-            ),
-        )
         return solution
+
+    def get_intersection_graph(self):
+        line_indeces = [
+            line[STR_ARC].reflected_signal.index for line in self.lines
+        ]
+        g = nx.Graph()
+        g.add_nodes_from(line_indeces)
+        pairs = itertools.combinations(self.lines, 2)
+        for pair in pairs:
+            if util.intersect_2d(
+                pair[0][STR_START],
+                pair[0][STR_END],
+                pair[1][STR_START],
+                pair[1][STR_END],
+            ):
+                g.add_edge(
+                    pair[0][STR_ARC].reflected_signal.index,
+                    pair[1][STR_ARC].reflected_signal.index,
+                )
+        return g
 
     # Get 12 hemispheres with random initial orientation
     @staticmethod

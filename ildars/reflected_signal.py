@@ -13,14 +13,16 @@ class ReflectedSignal:
     respective time difference between receiving the two signals.
     """
 
+    Signals = {}
+
     def __init__(
         self, direction, direct_signal, delta, index, original_sender_position
     ):
         self.direction = np.array(direction)
         self.direct_signal = direct_signal
         self.delta = delta
-        # Index is only here for debugging purposes
         self.index = index
+        ReflectedSignal.Signals[index] = self
         self.original_sender_position = np.array(original_sender_position)
 
     def __str__(self):

@@ -10,3 +10,10 @@ class Arc:
         end = delta * ((w - v) / np.linalg.norm(w - v) ** 2)
         self.start = start / np.linalg.norm(start)
         self.end = end / np.linalg.norm(end)
+        self.reflected_signal = reflected_signal
+
+    def __eq__(self, o):
+        return self.reflected_signal.index == o.reflected_signal.index
+
+    def __hash__(self):
+        return hash(self.reflected_signal.index)
