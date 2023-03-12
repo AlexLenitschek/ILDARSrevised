@@ -40,8 +40,6 @@ def find_clusters(hemispheres):
 
     # Get connected components
     components = list(nx.connected_components(g))
-    for c in components:
-        print(c, len(c) > 1)
     # Filter out single nodes
     components = [c for c in components if len(c) > 1]
     clusters = [
