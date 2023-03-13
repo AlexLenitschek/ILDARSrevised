@@ -6,7 +6,5 @@ class ReflectionCluster:
     def __init__(self, reflected_signals):
         self.reflected_signals = reflected_signals
 
-    def _get_size(self):
+    def __len__(self):
         return len(self.reflected_signals)
-
-    size = property(fget=_get_size)

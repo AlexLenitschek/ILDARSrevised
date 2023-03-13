@@ -2,6 +2,8 @@ from enum import Enum
 import operator
 import numpy as np
 
+import ildars.localization.wall_selection as ws
+
 WallSelectionMethod = Enum(
     "WallSelectionMethod",
     [
@@ -22,27 +24,31 @@ LocalizationAlgorithm = Enum(
     ],
 )
 
+_AveragingMethod = Enum("_AveragingMethod", ["EVEN"])
+
 
 def compute_sender_positions(
-    wall_selection_algorithm,
     localization_algorithm,
     reflection_clusters,
     direct_signals,
     reflected_signals,
+    algo=WallSelectionMethod.LARGEST_REFLECTION_CLUSTER,
 ):
-    if (
-        wall_selection_algorithm
-        is WallSelectionMethod.LARGEST_REFLECTION_CLUSTER
-    ):
-        return compute_sender_positions_largest_cluster(
-            localization_algorithm, reflection_clusters, reflected_signals
-        )
+    averaging_method = _AveragingMethod.EVEN
+    cluster_selection = [reflection_clusters[0]]
+    if algo is WallSelectionMethod.LARGEST_REFLECTION_CLUSTER:
+        cluster_selection = ws.select_by_largest_cluster(reflection_clusters)
+    # if algo is WallSelectionMethod.NARROWEST_CLUSTER:
+    #     cluster
     else:
         raise NotImplementedError(
             "Wall selection algorithm",
-            wall_selection_algorithm,
+            algo,
             "is either unknown or not implemented yet.",
         )
+    return compute_sender_positions_largest_cluster(
+        localization_algorithm, reflection_clusters, reflected_signals
+    )
 
 
 # Wall selection methods
@@ -50,7 +56,7 @@ def compute_sender_positions_largest_cluster(
     localization_algorithm, reflection_clusters, reflected_signals
 ):
     assert len(reflection_clusters) > 0
-    largest_cluster = max(reflection_clusters, key=operator.attrgetter("size"))
+    largest_cluster = max(reflection_clusters, key=len)
     return compute_sender_positions_for_given_wall(
         localization_algorithm, largest_cluster.wall_normal, reflected_signals
     )

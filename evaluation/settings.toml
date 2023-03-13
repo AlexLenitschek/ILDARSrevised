@@ -35,7 +35,7 @@ wall_error = 0.5 # 5% of reflection will wrongly be assigned
 
     [algorithms.localization]
     wall_direction = true
-    map_to_wall_normal = false
-    reflection_geometry = false
+    map_to_wall_normal = true
+    reflection_geometry = true
     closest_lines = false
     closest_lines_extended = false

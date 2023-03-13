@@ -19,5 +19,5 @@ def compute_reflection_clusters(clustering_algorithm, reflected_signals):
             clustering_algorithm,
             "is not known or not implemented.",
         )
-    return [c for c in clusters if c.size > 1]
+    return [c for c in clusters if len(c) > 1]
     # return list(filter(lambda c: c.size > 1, clusters))
