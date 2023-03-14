@@ -3,7 +3,6 @@
 
 import numpy as np
 from scipy.stats import vonmises_line, uniform
-from scipy.spatial.transform import Rotation
 
 import ildars.math_utils as util
 
@@ -26,36 +25,33 @@ def simulate_reflection_error(
 def simulate_directional_error(vector, von_mises_error):
     # Completely new function based on
     # https://math.stackexchange.com/questions/4343044/rotate-vector-by-a-random-little-amount
-    # v = np.divide(vector, np.linalg.norm(vector))
-    # Find orthonormal basis including
-
-    orthogonal_vector = random_orthogonal_vector(vector)
+    v = util.normalize(vector)
+    # Find a random vector that is not parallel to v
+    r = util.normalize(np.random.rand(3))
+    while abs(np.dot(r, v)) == 1:
+        r = util.normalize(np.random.rand(3))
+    u1 = util.normalize(np.cross(v, r))
+    u2 = util.normalize(np.cross(v, u1))
+    # Now (v,u1,u2) are an orthonormal basis of R^3
+    B = np.array([u1, u2, v])
+    # Get random angle using von Mises distribution
     if von_mises_error > 0:
-        random_angle = vonmises_line(von_mises_error).rvs()
+        theta = vonmises_line(von_mises_error).rvs()
     else:
-        random_angle = uniform.rvs(-np.pi, 2 * np.pi)
-    # rotate using the random orthogonal vector as rotation vector
-    rotation = Rotation.from_rotvec(random_angle * orthogonal_vector)
-    return rotation.apply(vector)
-
-
-def random_orthogonal_vector(vector):
-    normalized_vector = util.normalize(vector)
-    rearranged_vector = np.array(
-        [-1 * normalized_vector[2], normalized_vector[0], normalized_vector[1]]
+        theta = uniform.rvs(-np.pi, np.pi)
+    phi = uniform.rvs(-np.pi, np.pi)
+    # Get rotated vector relative to B
+    rotated_vector_b = np.dot(
+        np.linalg.norm(vector),
+        np.array(
+            [
+                np.sin(theta) * np.cos(phi),
+                np.sin(theta) * np.sin(phi),
+                np.cos(theta),
+            ]
+        ),
     )
-    tangent = np.cross(normalized_vector, rearranged_vector)
-    bitangent = np.cross(normalized_vector, tangent)
-    # use uniform distribution because scipy's vonmises does not support
-    # concentration of 0. This should however be equivalent to the original
-    # implementation in Mathmatica, see "Relationship to other distibutions" at
-    # https://reference.wolfram.com/language/ref/VonMisesDistribution.html
-    random_angle = uniform.rvs(-np.pi, 2 * np.pi)
-    orth = np.add(
-        np.multiply(tangent, np.sin(random_angle)),
-        np.multiply(bitangent, np.cos(random_angle)),
-    )
-    return util.normalize(orth)
+    return B.T.dot(rotated_vector_b)
 
 
 def simulate_numeric_error(delta, delta_error):

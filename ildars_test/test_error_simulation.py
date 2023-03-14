@@ -3,10 +3,8 @@
 import numpy as np
 from scipy.stats import vonmises_line, cramervonmises, circstd
 
-from evaluation.error_simulation import (
-    simulate_directional_error,
-    random_orthogonal_vector,
-)
+import ildars.math_utils as util
+from evaluation.error_simulation import simulate_directional_error
 
 ITERATIONS = 1000
 
@@ -48,9 +46,9 @@ def compute_angle(v1, v2):
 def test_directional_error():
     for c in CONCENTRATIONS:
         offsets = []
-        for i in range(ITERATIONS):
+        for _ in range(ITERATIONS):
             # compute random vector, which is not normalized
-            random_vector = np.array([np.random.random() for _ in range(3)])
+            random_vector = util.normalize(np.random.rand(3))
             error_vector = simulate_directional_error(
                 random_vector, c["CONCENTRATION"]
             )
@@ -65,27 +63,7 @@ def test_directional_error():
         )
 
 
-def test_random_orthogonal_vector():
-    # generate one random orthogonal vector
-    vec = np.array([np.random.random() for _ in range(3)])
-    init_orth = random_orthogonal_vector(vec)
-    angles = [
-        compute_angle(
-            init_orth,
-            random_orthogonal_vector(vec),
-        )
-        for _ in range(ITERATIONS)
-    ]
-    print(
-        "Cramer-von Mises test for",
-        ITERATIONS,
-        "iterations of random_orthogonal_vector",
-        cramervonmises(angles, "uniform", args=(0, np.pi)),
-    )
-
-
 def main():
-    test_random_orthogonal_vector()
     test_directional_error()
     test_von_mises_distribution()
     print("All error simulation tests run successfully")

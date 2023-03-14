@@ -1,6 +1,6 @@
 # Collection of all tests for ildars and evaluation modules
-from . import test_error_simulation
-from . import inversion_test
+from ildars_test import test_error_simulation
+from ildars_test import inversion_test
 
 
 def main():
