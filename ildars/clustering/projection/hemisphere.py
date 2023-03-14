@@ -176,7 +176,7 @@ class Hemisphere:
             np.array([1, -1, -1]),
         ]
         # normalize all vectors
-        vectors = [vec / np.linalg.norm(vec) for vec in vectors]
+        vectors = [math_util.normalize(vec) for vec in vectors]
 
         # randomly rotate all vectors
         rotation = sp.spatial.transform.Rotation.random()

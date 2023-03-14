@@ -2,7 +2,10 @@
 import numpy as np
 import math
 from enum import Enum
-from .cluster import ReflectionCluster
+
+import ildars.math_utils as util
+from ildars.clustering.cluster import ReflectionCluster
+
 
 # Hard coded thresholds
 # Maximum (absolute) distance betweet two line in the same bin
@@ -139,11 +142,7 @@ class Line:
         self.p1 = p1
         self.p2 = p2
         self.reflected_signal = reflected_signal
-        self.direction = np.subtract(self.p2, self.p1)
-        # normalize direction
-        self.direction = np.divide(
-            self.direction, np.linalg.norm(self.direction)
-        )
+        self.direction = util.normalize(np.subtract(self.p2, self.p1))
 
     def __str__(self):
         return (

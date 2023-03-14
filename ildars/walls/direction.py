@@ -48,7 +48,7 @@ def compute_direction_from_pairs(
             partial_normal = inv_partial_normal
         normal += partial_normal
 
-    normal = np.divide(normal, np.linalg.norm(normal))
+    normal = util.normalize(normal)
     for reflected_signal in reflection_cluster.reflected_signals:
         reflected_signal.wall_normal = normal
     reflection_cluster.wall_normal = normal

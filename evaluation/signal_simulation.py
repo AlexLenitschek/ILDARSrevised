@@ -1,5 +1,7 @@
 import numpy as np
+
 import ildars
+import ildars.math_utils as util
 
 # "Small" number that the determinant is compared to
 EPSILON = 0.000000001
@@ -46,7 +48,7 @@ def generate_measurements(receiver_position, sender_positions, room):
             edge1 = np.subtract(triangle[1], triangle[0])
             edge2 = np.subtract(triangle[2], triangle[0])
             normal = np.cross(edge1, edge2)
-            line_direction = np.divide(normal, np.linalg.norm(normal))
+            line_direction = util.normalize(normal)
             intersection_point = get_line_plane_intersection(
                 receiver_position, line_direction, triangle[0], line_direction
             )
@@ -62,9 +64,7 @@ def generate_measurements(receiver_position, sender_positions, room):
             # Compute and normalize reflection direction and o then intersect
             # it with walls
             reflection_direction = np.subtract(mirror_point, sender_position)
-            reflection_direction = np.divide(
-                reflection_direction, np.linalg.norm(reflection_direction)
-            )
+            reflection_direction = util.normalize(reflection_direction)
             reflection_point = get_line_triangle_intersection(
                 sender_position, reflection_direction, triangle
             )
@@ -76,9 +76,8 @@ def generate_measurements(receiver_position, sender_positions, room):
             reflected_signal_length = np.linalg.norm(
                 reflected_signal_direction
             ) + np.linalg.norm(np.subtract(sender_position, reflection_point))
-            reflected_signal_direction = np.divide(
-                reflected_signal_direction,
-                np.linalg.norm(reflected_signal_direction),
+            reflected_signal_direction = util.normalize(
+                reflected_signal_direction
             )
             reflected_signals.append(
                 ildars.ReflectedSignal(

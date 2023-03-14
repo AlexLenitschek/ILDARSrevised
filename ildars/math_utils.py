@@ -21,6 +21,6 @@ def get_angular_dist(v1: np.array, v2: np.array) -> float:
 # get the angle between two vectors. Implementation taken from
 # https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python
 def get_angle(v1: np.array, v2: np.array) -> float:
-    u1 = v1 / np.linalg.norm(v1)
-    u2 = v2 / np.linalg.norm(v2)
+    u1 = normalize(v1)
+    u2 = normalize(v2)
     return np.arccos(np.clip(np.dot(u1, u2), -1.0, 1.0))

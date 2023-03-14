@@ -5,6 +5,8 @@ import numpy as np
 from scipy.stats import vonmises_line, uniform
 from scipy.spatial.transform import Rotation
 
+import ildars.math_utils as util
+
 
 def simulate_reflection_error(
     reflected_signals, von_mises_error, delta_error, wall_error
@@ -38,7 +40,7 @@ def simulate_directional_error(vector, von_mises_error):
 
 
 def random_orthogonal_vector(vector):
-    normalized_vector = np.divide(vector, np.linalg.norm(vector))
+    normalized_vector = util.normalize(vector)
     rearranged_vector = np.array(
         [-1 * normalized_vector[2], normalized_vector[0], normalized_vector[1]]
     )
@@ -53,7 +55,7 @@ def random_orthogonal_vector(vector):
         np.multiply(tangent, np.sin(random_angle)),
         np.multiply(bitangent, np.cos(random_angle)),
     )
-    return orth / np.linalg.norm(orth)
+    return util.normalize(orth)
 
 
 def simulate_numeric_error(delta, delta_error):
