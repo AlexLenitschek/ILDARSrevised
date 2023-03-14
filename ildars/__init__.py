@@ -39,11 +39,11 @@ def run_ildars(
         )
     # Compute sender positions
     sender_positions = localization.compute_sender_positions(
-        wall_selection_algorithm,
         localization_algorithm,
         reflection_clusters,
         direct_signals,
         reflected_signals,
+        wall_selection_algorithm,
     )
     # return everything
     return (reflection_clusters, sender_positions)

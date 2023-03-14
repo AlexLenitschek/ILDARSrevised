@@ -2,6 +2,7 @@ import itertools
 
 import numpy as np
 
+import ildars.math_utils as util
 
 STR_ALL = "all"
 STR_DISJOINT = "disjoint"
@@ -22,12 +23,12 @@ def compute_direction_from_pairs(
     normal = np.cross(inner_cross[0], inner_cross[1])
     inv_normal = np.multiply(normal, -1)
     # Get the "correct" direction of normal, according to v direction.
-    pos_dist = get_angular_dist(
+    pos_dist = util.get_angular_dist(
         normal, reflected_signals[0].direction
-    ) + get_angular_dist(normal, reflected_signals[1].direction)
-    neg_dist = get_angular_dist(
+    ) + util.get_angular_dist(normal, reflected_signals[1].direction)
+    neg_dist = util.get_angular_dist(
         inv_normal, reflected_signals[0].direction
-    ) + get_angular_dist(inv_normal, reflected_signals[1].direction)
+    ) + util.get_angular_dist(inv_normal, reflected_signals[1].direction)
     # Flip normal if its inversion is closer to the wall, according to v
     # vectors from the first two measurements.
     # TODO: wouldn't this be more accurate if we average over all v vectors
@@ -41,9 +42,9 @@ def compute_direction_from_pairs(
         inner = pair[1]
         partial_normal = np.cross(outer, inner)
         inv_partial_normal = np.multiply(partial_normal, -1)
-        if get_angular_dist(inv_partial_normal, normal) < get_angular_dist(
-            partial_normal, normal
-        ):
+        if util.get_angular_dist(
+            inv_partial_normal, normal
+        ) < util.get_angular_dist(partial_normal, normal):
             partial_normal = inv_partial_normal
         normal += partial_normal
 
@@ -68,11 +69,3 @@ def compute_direction_all_pairs_linear(reflected_signals):
     # TODO: assign computed wall normal vector to each reflected signal, i.e
     # reflected_signal.wall_normal_vector = computed_wall_normal_vector
     print("Linear All Pairs not yet implemented")
-
-
-# Helper function: Get the relative angular distance between two vetors.
-# 0 means the vectors are parallel, 2 means they are opposite.
-def get_angular_dist(v1, v2):
-    v1 = np.divide(v1, np.linalg.norm(v1))
-    v2 = np.divide(v2, np.linalg.norm(v2))
-    return abs(np.dot(v1, v2) - 1)

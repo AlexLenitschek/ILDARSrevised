@@ -7,6 +7,7 @@ from skspatial.objects import Plane, Line, Circle
 # only for debugging
 import ildars_visualization.gnomonic_projection as viz
 
+import ildars.math_utils as math_util
 from . import util
 
 # Threshold for detecting, whether a given arc is on a given hemisphere
@@ -23,7 +24,7 @@ STR_ARC = "arc"
 
 class Hemisphere:
     def __init__(self, center):
-        self.center = util.normalize(center)
+        self.center = math_util.normalize(center)
         self.lines = []
 
     # add arc to hemisphere, if its distance to the hemisphere center is below
@@ -77,15 +78,15 @@ class Hemisphere:
     # the line between v_in and v_out losing its direction
     def clip_vector_to_hemisphere(self, v_out, v_in):
         circle_center = np.array([0, 0, 0])
-        circle_normal = util.normalize(np.cross(v_in, v_out))
+        circle_normal = math_util.normalize(np.cross(v_in, v_out))
         hemi_plane_center = COS_C_THRESHOLD * self.center
         hemi_plane_normal = self.center
         cirle_plane = Plane(point=circle_center, normal=circle_normal)
         hemi_plane = Plane(point=hemi_plane_center, normal=hemi_plane_normal)
         cirle_hemi_intersection = cirle_plane.intersect_plane(hemi_plane)
         # get a new base of R^3 that is aligned to the circle plane
-        cp_bv1 = util.normalize(v_in)
-        cp_bv2 = util.normalize(np.cross(circle_normal, cp_bv1))
+        cp_bv1 = math_util.normalize(v_in)
+        cp_bv2 = math_util.normalize(np.cross(circle_normal, cp_bv1))
         cp_bv3 = circle_normal
         # now we get a base transformation matrix from our circle space to the
         # space with standard base
@@ -112,7 +113,7 @@ class Hemisphere:
         # we now have two points on our 2d circle and select the right one.
         # To do so, we transform our original start and endpoint of our arc
         # and compare the polar coordinates
-        arc_start_2d = mat_std_circ.dot(util.normalize(v_out))[:-1]
+        arc_start_2d = mat_std_circ.dot(math_util.normalize(v_out))[:-1]
         # arc_end_2d = np.array([1, 0])  # we chose v_in as x-axis for our space
         # convert all points to polar coordinates, but ignoring the radius,
         # which is 1 for all points

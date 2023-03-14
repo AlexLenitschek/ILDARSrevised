@@ -26,6 +26,7 @@ DELTA_ERROR = settings["error"]["delta_error"]
 WALL_ERROR = settings["error"]["wall_error"]
 
 NUM_ITERATIONS = settings["general"]["iterations"]
+NUM_SENDERS = settings["general"]["num_senders"]
 
 receiver_position = np.array(
     [
@@ -92,7 +93,7 @@ def run_experiment(algo_conf, iterations=1):
                 random.uniform(-1, 1),
                 random.uniform(-1, 1),
             )
-            for i in range(10)
+            for i in range(NUM_SENDERS)
         ]
 
         (

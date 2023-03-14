@@ -35,7 +35,9 @@ def generate_measurements(receiver_position, sender_positions, room):
         direct_signal_direction = np.divide(
             direct_signal_direction, np.linalg.norm(direct_signal_direction)
         )
-        direct_signal = ildars.DirectSignal(direct_signal_direction)
+        direct_signal = ildars.DirectSignal(
+            direct_signal_direction, sender_position
+        )
         # TODO: Check if the direct signal can actually be receiver or is
         # obstructed by a wall
         direct_signals.append(direct_signal)

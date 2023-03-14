@@ -3,18 +3,6 @@ import numpy as np
 from skspatial.objects import LineSegment
 
 
-def normalize(v):
-    return v / np.linalg.norm(v)
-
-
-# get the angle between two vectors. Implementation taken from
-# https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python
-def get_angle(v1, v2):
-    u1 = v1 / np.linalg.norm(v1)
-    u2 = v2 / np.linalg.norm(v2)
-    return np.arccos(np.clip(np.dot(u1, u2), -1.0, 1.0))
-
-
 # get latitude and longituede in radians for given vector
 def carth_to_lat_lon(v):
     lat = np.arcsin(v[2])
