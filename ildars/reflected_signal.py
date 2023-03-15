@@ -27,3 +27,9 @@ class ReflectedSignal:
 
     def __str__(self):
         return "Reflection: #" + str(self.index)
+
+    def __eq__(self, o):
+        return self.index == o.index
+
+    def __hash__(self):
+        return hash(self.index)

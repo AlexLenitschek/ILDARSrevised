@@ -41,6 +41,8 @@ def read_algorithm_selection_from_settings(settings):
         localization.append(LocalizationAlgorithm.REFLECTION_GEOMETRY)
     if settings["algorithms"]["localization"]["closest_lines"]:
         localization.append(LocalizationAlgorithm.CLOSEST_LINES)
+    if settings["algorithms"]["localization"]["closest_lines_extended"]:
+        localization.append(LocalizationAlgorithm.CLOSEST_LINES_EXTENDED)
     return {
         "clustering": clustering,
         "wall_normal": wall_normal,

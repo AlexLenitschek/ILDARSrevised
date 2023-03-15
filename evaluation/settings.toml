@@ -19,8 +19,8 @@ wall_error = 0.5 # 5% of reflection will wrongly be assigned
 [algorithms]
 
     [algorithms.clustering]
-    inversion = false
-    projection = true
+    inversion = true
+    projection = false
 
     [algorithms.wall_normal]
     all_pairs = true
@@ -35,8 +35,8 @@ wall_error = 0.5 # 5% of reflection will wrongly be assigned
     weighted_average_wall_distance = false
 
     [algorithms.localization]
-    wall_direction = true
-    map_to_wall_normal = true
-    reflection_geometry = true
+    wall_direction = false
+    map_to_wall_normal = false
+    reflection_geometry = false
     closest_lines = false
-    closest_lines_extended = false
+    closest_lines_extended = true

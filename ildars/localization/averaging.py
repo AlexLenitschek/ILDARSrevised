@@ -8,7 +8,9 @@ from ildars.localization.sender_localization import (
     STR_ORIGINAL,
 )
 
-AveragingMethod = Enum("AveragingMethod", ["UNWEIGHTED"])
+AveragingMethod = Enum(
+    "AveragingMethod", ["UNWEIGHTED", "WEIGHTED_WALL_DISTANCE"]
+)
 
 STR_POSITION = "position"
 STR_WEIGHT = "weight"

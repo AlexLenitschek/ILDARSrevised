@@ -10,7 +10,6 @@ WallSelectionMethod = Enum(
         "UNWEIGHTED_AVERAGE",
         "WEIGHTED_AVERAGE_WALL_DISTANCE",
         "CLOSEST_LINES_EXTENDED",
-        "ALL_CLUSTERS",
     ],
 )
 
