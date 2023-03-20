@@ -37,4 +37,4 @@ def compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster):
         )
     direction = reflection_cluster.wall_normal
     distance = compute_distance(direction, reflection_cluster)
-    reflection_cluster.wall_normal = np.multiply(direction, distance)
+    reflection_cluster.wall_normal = direction * distance

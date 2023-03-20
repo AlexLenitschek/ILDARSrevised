@@ -22,21 +22,17 @@ def generate_measurements(receiver_position, sender_positions, room):
     # Compute triangles
     room_triangles = [
         [
-            room.vertices[face[0]],
-            room.vertices[face[1]],
-            room.vertices[face[2]],
+            np.subtract(room.vertices[face[0]], receiver_position),
+            np.subtract(room.vertices[face[1]], receiver_position),
+            np.subtract(room.vertices[face[2]], receiver_position),
         ]
         for face in room_triangle_indices
     ]
     for sender_position in sender_positions:
         # Compute direct signal direction and length
-        direct_signal_direction = np.subtract(
-            sender_position, receiver_position
-        )
+        direct_signal_direction = sender_position
         direct_signal_length = np.linalg.norm(direct_signal_direction)
-        direct_signal_direction = np.divide(
-            direct_signal_direction, np.linalg.norm(direct_signal_direction)
-        )
+        direct_signal_direction = util.normalize(direct_signal_direction)
         direct_signal = ildars.DirectSignal(
             direct_signal_direction, sender_position
         )
@@ -50,17 +46,12 @@ def generate_measurements(receiver_position, sender_positions, room):
             normal = np.cross(edge1, edge2)
             line_direction = util.normalize(normal)
             intersection_point = get_line_plane_intersection(
-                receiver_position, line_direction, triangle[0], line_direction
+                np.zeros(3), line_direction, triangle[0], line_direction
             )
             if intersection_point is None:
                 # Continue with next triangle, if no intersection exists
                 continue
-            mirror_point = np.add(
-                receiver_position,
-                np.multiply(
-                    np.subtract(intersection_point, receiver_position), 2
-                ),
-            )
+            mirror_point = np.multiply(intersection_point, 2)
             # Compute and normalize reflection direction and o then intersect
             # it with walls
             reflection_direction = np.subtract(mirror_point, sender_position)
@@ -70,9 +61,7 @@ def generate_measurements(receiver_position, sender_positions, room):
             )
             if reflection_point is None:
                 continue
-            reflected_signal_direction = np.subtract(
-                reflection_point, receiver_position
-            )
+            reflected_signal_direction = reflection_point
             reflected_signal_length = np.linalg.norm(
                 reflected_signal_direction
             ) + np.linalg.norm(np.subtract(sender_position, reflection_point))

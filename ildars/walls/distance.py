@@ -1,5 +1,7 @@
 import numpy as np
 
+import ildars.math_utils as util
+
 
 def compute_distance(direction, reflection_cluster):
     return sum(
@@ -12,17 +14,20 @@ def compute_distance(direction, reflection_cluster):
 
 def compute_distance_from_measurement(direction, reflection):
     # Compute distance to sender using wall direction formula
-    u = np.divide(direction, np.linalg.norm(direction))
+    u = util.normalize(direction)
     v = reflection.direct_signal.direction
     w = reflection.direction
     delta = reflection.delta
-    b = np.cross(np.cross(u, v), u)
+    b = util.normalize(np.cross(np.cross(u, v), u))
     p = 0
     dot = np.dot(np.subtract(v, w), b)
     if dot != 0:
-        p = np.divide(np.multiply(np.dot(w, b), delta), dot)
+        p = np.abs(np.divide(np.multiply(np.dot(w, b), delta), dot))
+    else:
+        print("encountered parallel vectors in distance averaging")
     # now compute wall distance by projecting (r+s)/2 onto u
-    r = np.multiply(v, p)
-    s = np.multiply(w, np.add(p, delta))
+    r = w * (p + delta)
+    s = v * p
     rshalf = np.divide(np.add(r, s), 2)
-    return np.dot(rshalf, u)
+    wall_distance = np.abs(np.dot(rshalf, u))
+    return wall_distance

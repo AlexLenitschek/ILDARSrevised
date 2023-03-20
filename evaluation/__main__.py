@@ -88,10 +88,12 @@ def run_experiment(algo_conf, iterations=1):
         print("  iteration:", current_iteration)
         # random sender positions
         sender_positions = [
-            (
-                random.uniform(-1, 1),
-                random.uniform(-1, 1),
-                random.uniform(-1, 1),
+            np.array(
+                [
+                    random.uniform(-1, 1),
+                    random.uniform(-1, 1),
+                    random.uniform(-1, 1),
+                ]
             )
             for i in range(NUM_SENDERS)
         ]
