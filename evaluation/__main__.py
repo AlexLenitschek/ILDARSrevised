@@ -1,4 +1,3 @@
-import random
 import toml
 import csv
 from pathlib import Path
@@ -86,23 +85,12 @@ def run_experiment(algo_conf, iterations=1):
         print("  Wall selection algorithm:", algo_conf[STR_WALL_SELECTION])
         print("  Localization algorithm:", algo_conf[STR_LOCALIZATION])
         print("  iteration:", current_iteration)
-        # random sender positions
-        sender_positions = [
-            np.array(
-                [
-                    random.uniform(-1, 1),
-                    random.uniform(-1, 1),
-                    random.uniform(-1, 1),
-                ]
-            )
-            for i in range(NUM_SENDERS)
-        ]
 
         (
             direct_signals,
             reflected_signals,
         ) = signal_simulation.generate_measurements(
-            receiver_position, sender_positions, testrooms.CUBE
+            receiver_position, testrooms.CUBE, NUM_SENDERS
         )
         # TODO: fix and use error simulation
         # reflected_signals = error_simulation.simulate_reflection_error(
@@ -121,22 +109,24 @@ def run_experiment(algo_conf, iterations=1):
     return positions
 
 
+res_dir = "/".join(
+    [
+        "results",
+        str(
+            datetime.datetime.now()
+            .replace(second=0, microsecond=0)
+            .isoformat()
+        ),
+    ]
+).lower()
+
+
 for algo_conf in algo_configurations(algo_sel):
     positions = run_experiment(algo_conf, NUM_ITERATIONS)
     name_clustering = str(algo_conf[STR_CLUSTERING]).split(".")[-1]
     name_wall_normal = str(algo_conf[STR_WALL_NORMAL]).split(".")[-1]
     name_wall_selection = str(algo_conf[STR_WALL_SELECTION]).split(".")[-1]
     name_localization = str(algo_conf[STR_LOCALIZATION]).split(".")[-1]
-    res_dir = "/".join(
-        [
-            "results",
-            str(
-                datetime.datetime.now()
-                .replace(second=0, microsecond=0)
-                .isoformat()
-            ),
-        ]
-    ).lower()
     res_name = (
         f"{name_clustering}-"
         + f"{name_wall_normal}-"

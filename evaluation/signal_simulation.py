@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 import ildars
@@ -7,7 +9,7 @@ import ildars.math_utils as util
 EPSILON = 0.000000001
 
 
-def generate_measurements(receiver_position, sender_positions, room):
+def generate_measurements(receiver_position, room, num_senders):
     direct_signals = []
     reflected_signals = []
     # For debugging: assign an index to each reflected signal
@@ -27,6 +29,18 @@ def generate_measurements(receiver_position, sender_positions, room):
             np.subtract(room.vertices[face[2]], receiver_position),
         ]
         for face in room_triangle_indices
+    ]
+    # random sender positions
+    sender_positions = [
+        np.array(
+            [
+                random.uniform(-1, 1),
+                random.uniform(-1, 1),
+                random.uniform(-1, 1),
+            ]
+        )
+        - receiver_position
+        for i in range(num_senders)
     ]
     for sender_position in sender_positions:
         # Compute direct signal direction and length
