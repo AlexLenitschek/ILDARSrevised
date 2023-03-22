@@ -23,7 +23,6 @@ class ReflectedSignal:
         self.delta = delta
         self.index = index
         ReflectedSignal.Signals[index] = self
-        self.original_sender_position = np.array(original_sender_position)
 
     def __str__(self):
         return "Reflection: #" + str(self.index)

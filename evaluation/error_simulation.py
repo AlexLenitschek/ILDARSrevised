@@ -2,13 +2,13 @@
 """
 
 import numpy as np
-from scipy.stats import vonmises_line, uniform
+from scipy.stats import vonmises_line, uniform, norm
 
 import ildars.math_utils as util
 
 
 def simulate_reflection_error(
-    reflected_signals, von_mises_error, delta_error, wall_error
+    reflected_signals, von_mises_error, delta_error, wall_error, direct_signals
 ):
     for signal in reflected_signals:
         if von_mises_error > 0:
@@ -18,7 +18,9 @@ def simulate_reflection_error(
         if delta_error > 0:
             signal.delta = simulate_numeric_error(signal.delta, delta_error)
     if wall_error > 0:
-        reflected_signals = simulate_wall_error(reflected_signals, wall_error)
+        reflected_signals = simulate_wall_error(
+            reflected_signals, wall_error, direct_signals
+        )
     return reflected_signals
 
 
@@ -55,8 +57,31 @@ def simulate_directional_error(vector, von_mises_error):
 
 
 def simulate_numeric_error(delta, delta_error):
-    return delta
+    return np.abs(delta + norm.rvs(loc=0, scale=delta_error))
 
 
-def simulate_wall_error(reflected_signals, wall_error):
+def simulate_wall_error(reflected_signals, wall_error, direct_signals):
+    # select a random sample of the size implied by wall_error
+    rng = np.random.default_rng()
+    num_modified_reflections = int(
+        np.round(len(reflected_signals) * wall_error)
+    )
+    modified_reflections = [
+        reflected_signals[i]
+        for i in rng.choice(
+            a=len(reflected_signals),
+            size=(num_modified_reflections),
+            replace=False,
+        )
+    ]
+    for ref in modified_reflections:
+        # Choose a random direct signal, which is not the actual direct signal
+        # of the current reflected signal
+        new_direct_signal = direct_signals[rng.integers(len(direct_signals))]
+        while new_direct_signal == ref.direct_signal:
+            new_direct_signal = direct_signals[
+                rng.integers(len(direct_signals))
+            ]
+        # now swap out the old reflected signal for the new one
+        ref.direct_signal = new_direct_signal
     return reflected_signals

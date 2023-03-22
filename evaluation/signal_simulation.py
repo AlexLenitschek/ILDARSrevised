@@ -75,22 +75,19 @@ def generate_measurements(receiver_position, room, num_senders):
             )
             if reflection_point is None:
                 continue
-            reflected_signal_direction = reflection_point
+            ref_signal_direction = reflection_point
             reflected_signal_length = np.linalg.norm(
-                reflected_signal_direction
+                ref_signal_direction
             ) + np.linalg.norm(np.subtract(sender_position, reflection_point))
-            reflected_signal_direction = util.normalize(
-                reflected_signal_direction
+            ref_signal_direction = util.normalize(ref_signal_direction)
+            new_ref_sig = ildars.ReflectedSignal(
+                ref_signal_direction,
+                direct_signal,
+                reflected_signal_length - direct_signal_length,
+                reflection_index,
+                np.array(sender_position),
             )
-            reflected_signals.append(
-                ildars.ReflectedSignal(
-                    reflected_signal_direction,
-                    direct_signal,
-                    reflected_signal_length - direct_signal_length,
-                    reflection_index,
-                    np.array(sender_position),
-                )
-            )
+            reflected_signals.append(new_ref_sig)
             reflection_index += 1
 
     return (direct_signals, reflected_signals)

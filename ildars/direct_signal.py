@@ -12,13 +12,9 @@ class DirectSignal:
 
     def __init__(self, direction, original_sender_position):
         self.direction = np.array(direction)
-        self.reflected_signals = []
         self.id = DirectSignal._add_direct_signal(self)
         self.computed_sender_positions = []
         self.original_sender_position = np.array(original_sender_position)
-
-    def add_reflected_signal(self, reflected_signal):
-        self.reflected_signals.append(reflected_signal)
 
     def add_computed_position(self, computed_position):
         self.computed_sender_positions.append(computed_position)

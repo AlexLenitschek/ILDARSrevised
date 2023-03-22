@@ -10,6 +10,8 @@ from . import testrooms
 from . import signal_simulation
 from .renderer import Renderer
 
+from . import error_simulation
+
 # Read experiment setup from settings.toml file
 settings_file = open("evaluation/settings.toml", "r")
 settings = toml.load(settings_file)
@@ -93,9 +95,13 @@ def run_experiment(algo_conf, iterations=1):
             receiver_position, testrooms.CUBE, NUM_SENDERS
         )
         # TODO: fix and use error simulation
-        # reflected_signals = error_simulation.simulate_reflection_error(
-        #     reflected_signals, VON_MISES_CONCENTRATION, DELTA_ERROR, WALL_ERROR
-        # )
+        reflected_signals = error_simulation.simulate_reflection_error(
+            reflected_signals,
+            VON_MISES_CONCENTRATION,
+            DELTA_ERROR,
+            WALL_ERROR,
+            direct_signals,
+        )
         new_clusters, new_positions = ildars.run_ildars(
             direct_signals,
             reflected_signals,

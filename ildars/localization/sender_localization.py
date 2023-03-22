@@ -53,7 +53,7 @@ def compute_sender_positions_for_given_wall(
                     ref_sig.direct_signal.direction, distance
                 ),
                 STR_DIRECT_SIGNAL: ref_sig.direct_signal,
-                STR_ORIGINAL: ref_sig.original_sender_position,
+                STR_ORIGINAL: ref_sig.direct_signal.original_sender_position,
             }
         )
     return positions
