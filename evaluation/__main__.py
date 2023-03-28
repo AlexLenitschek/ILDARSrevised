@@ -8,7 +8,8 @@ from .experiment_setup_parser import read_algorithm_selection_from_settings
 import ildars
 from . import testrooms
 from . import signal_simulation
-from .renderer import Renderer
+
+# from .renderer import Renderer
 
 from . import error_simulation
 
