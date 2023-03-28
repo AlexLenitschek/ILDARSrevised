@@ -1,0 +1,11 @@
+name: Run ILDARS Evaluation
+on: [push]
+jobs:
+  run-evaluation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          ptyhon-version: "3.11"
+      - run: pipenv run python -m evaluation
