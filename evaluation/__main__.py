@@ -4,14 +4,15 @@ from pathlib import Path
 import numpy as np
 import datetime
 
-from .experiment_setup_parser import read_algorithm_selection_from_settings
-import ildars
-from . import testrooms
-from . import signal_simulation
+from evaluation.runner import Runner
+from evaluation import testrooms
+from evaluation.export_results import export_experiment_results
+from evaluation.experiment_setup_parser import (
+    read_algorithm_selection_from_settings,
+)
 
-# from .renderer import Renderer
-
-from . import error_simulation
+# from evaluation import signal_simulation
+# from evaluation import error_simulation
 
 # Read experiment setup from settings.toml file
 settings_file = open("evaluation/settings.toml", "r")
@@ -39,7 +40,6 @@ receiver_position = np.array(
 )
 
 algo_sel = read_algorithm_selection_from_settings(settings)
-print("algorithm selection:", algo_sel)
 
 
 # Generator function for selected algorithms, so we can easily iterator over
@@ -78,42 +78,43 @@ def algo_configurations(algo_sel):
             i_clustering += 1
 
 
-def run_experiment(algo_conf, iterations=1):
+def run_experiment(iterations=1):
+    timestamp = str(
+        datetime.datetime.now().replace(second=0, microsecond=0).isoformat()
+    )
+
     current_iteration = 1
     positions = []
     while current_iteration <= iterations:
-        print("Selected configuration:")
-        print("  Clustering algorithm:", algo_conf[STR_CLUSTERING])
-        print("  Wall normal algorithm:", algo_conf[STR_WALL_NORMAL])
-        print("  Wall selection algorithm:", algo_conf[STR_WALL_SELECTION])
-        print("  Localization algorithm:", algo_conf[STR_LOCALIZATION])
-        print("  iteration:", current_iteration)
+        for algo_conf in algo_configurations(algo_sel):
+            # print("Selected configuration:")
+            # print("  Clustering algorithm:", algo_conf[STR_CLUSTERING])
+            # print("  Wall normal algorithm:", algo_conf[STR_WALL_NORMAL])
+            # print("  Wall selection algorithm:", algo_conf[STR_WALL_SELECTION])
+            # print("  Localization algorithm:", algo_conf[STR_LOCALIZATION])
+            # print("  iteration:", current_iteration)
 
-        (
-            direct_signals,
-            reflected_signals,
-        ) = signal_simulation.generate_measurements(
-            receiver_position, testrooms.CUBE, NUM_SENDERS
-        )
-        # TODO: fix and use error simulation
-        reflected_signals = error_simulation.simulate_reflection_error(
-            reflected_signals,
-            VON_MISES_CONCENTRATION,
-            DELTA_ERROR,
-            WALL_ERROR,
-            direct_signals,
-        )
-        new_clusters, new_positions = ildars.run_ildars(
-            direct_signals,
-            reflected_signals,
-            algo_conf[STR_CLUSTERING],
-            algo_conf[STR_WALL_NORMAL],
-            algo_conf[STR_WALL_SELECTION],
-            algo_conf[STR_LOCALIZATION],
-        )
-        positions += new_positions
+            positions = Runner.run_experiment(
+                testrooms.CUBE,
+                receiver_position,
+                NUM_SENDERS,
+                VON_MISES_CONCENTRATION,
+                DELTA_ERROR,
+                WALL_ERROR,
+                algo_conf[STR_CLUSTERING],
+                algo_conf[STR_WALL_NORMAL],
+                algo_conf[STR_WALL_SELECTION],
+                algo_conf[STR_LOCALIZATION],
+                current_iteration,
+            )
+            export_experiment_results(
+                timestamp, algo_conf, iteration, positions
+            )
         current_iteration += 1
     return positions
+
+
+run_experiment(NUM_ITERATIONS)
 
 
 res_dir = "/".join(
@@ -158,14 +159,3 @@ for algo_conf in algo_configurations(algo_sel):
                     ),
                 ]
             )
-
-
-# Visualization turned off for now
-# def new_experiment():
-#     pos_orig, clusters, pos_comp = run_experiment()
-#     return clusters, pos_orig, pos_comp
-
-
-# renderer = Renderer(
-#     receiver_position, new_experiment, clusters, pos_orig, pos_comp
-# )

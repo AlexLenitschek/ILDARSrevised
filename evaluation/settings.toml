@@ -12,9 +12,9 @@ num_senders = 10
     z = 0.3
 
 [error]
-von_mises_concentration = 1 # uniformly random
-delta_error = 0.1 # 10cm standard deviation
-wall_error = 0.03 # 5% of reflection will wrongly be assigned
+von_mises_concentration = 0 # uniformly random
+delta_error = 0 # 10cm standard deviation
+wall_error = 0 # 5% of reflection will wrongly be assigned
 
 [algorithms]
 

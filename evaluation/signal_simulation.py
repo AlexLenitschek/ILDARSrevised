@@ -4,6 +4,7 @@ import numpy as np
 
 import ildars
 import ildars.math_utils as util
+from ildars.direct_signal import DirectSignal
 
 # "Small" number that the determinant is compared to
 EPSILON = 0.000000001
@@ -47,9 +48,7 @@ def generate_measurements(receiver_position, room, num_senders):
         direct_signal_direction = sender_position
         direct_signal_length = np.linalg.norm(direct_signal_direction)
         direct_signal_direction = util.normalize(direct_signal_direction)
-        direct_signal = ildars.DirectSignal(
-            direct_signal_direction, sender_position
-        )
+        direct_signal = DirectSignal(direct_signal_direction, sender_position)
         # TODO: Check if the direct signal can actually be receiver or is
         # obstructed by a wall
         direct_signals.append(direct_signal)
@@ -85,7 +84,6 @@ def generate_measurements(receiver_position, room, num_senders):
                 direct_signal,
                 reflected_signal_length - direct_signal_length,
                 reflection_index,
-                np.array(sender_position),
             )
             reflected_signals.append(new_ref_sig)
             reflection_index += 1

@@ -15,9 +15,7 @@ class ReflectedSignal:
 
     Signals = {}
 
-    def __init__(
-        self, direction, direct_signal, delta, index, original_sender_position
-    ):
+    def __init__(self, direction, direct_signal, delta, index):
         self.direction = np.array(direction)
         self.direct_signal = direct_signal
         self.delta = delta

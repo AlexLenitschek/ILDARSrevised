@@ -1,7 +1,6 @@
 """
 Basic classes and main function of the ILDARS pipeline.
 """
-from .direct_signal import DirectSignal
 from .reflected_signal import ReflectedSignal
 from . import clustering
 from . import walls
@@ -9,7 +8,6 @@ from . import localization
 
 
 def run_ildars(
-    direct_signals: list[DirectSignal],
     reflected_signals: list[ReflectedSignal],
     clustering_algorithm,
     wall_normal_algorithm,
@@ -33,16 +31,14 @@ def run_ildars(
     )
     # Compute wall normal vectors. Wall normal vectors will be assigned to
     # each reflected signal.
-    for reflection_cluster in reflection_clusters:
-        walls.compute_wall_normal_vector(
-            wall_normal_algorithm, reflection_cluster
-        )
+    reflection_clusters = [
+        walls.compute_wall_normal_vector(wall_normal_algorithm, cluster)
+        for cluster in reflection_clusters
+    ]
     # Compute sender positions
     sender_positions = localization.compute_sender_positions(
         localization_algorithm,
         reflection_clusters,
-        direct_signals,
-        reflected_signals,
         wall_selection_algorithm,
     )
     # return everything

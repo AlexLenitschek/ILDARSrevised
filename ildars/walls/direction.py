@@ -49,9 +49,10 @@ def compute_direction_from_pairs(
         normal += partial_normal
 
     normal = util.normalize(normal)
-    for reflected_signal in reflection_cluster.reflected_signals:
-        reflected_signal.wall_normal = normal
-    reflection_cluster.wall_normal = normal
+    # for reflected_signal in reflection_cluster.reflected_signals:
+    #     reflected_signal.wall_normal = normal
+    return normal
+    # reflection_cluster.wall_normal = normal
 
 
 def get_pairs(elements, method):
@@ -69,3 +70,4 @@ def compute_direction_all_pairs_linear(reflected_signals):
     # TODO: assign computed wall normal vector to each reflected signal, i.e
     # reflected_signal.wall_normal_vector = computed_wall_normal_vector
     print("Linear All Pairs not yet implemented")
+    return None
