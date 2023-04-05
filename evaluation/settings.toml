@@ -2,7 +2,7 @@
 
 [general]
 # Visualization will be generated iff. iterations are set to 1
-iterations = 1
+iterations = 2
 random_receiver = false
 num_senders = 10
     
@@ -12,9 +12,9 @@ num_senders = 10
     z = 0.3
 
 [error]
-von_mises_concentration = 0 # uniformly random
-delta_error = 0 # 10cm standard deviation
-wall_error = 0 # 5% of reflection will wrongly be assigned
+von_mises_concentration = 131.312 # expected 5 deg angular std. deviation
+delta_error = 0.1 # 10cm standard deviation
+wall_error = 0.05 # 5% of reflection will wrongly be assigned
 
 [algorithms]
 

@@ -1,8 +1,8 @@
-import toml
 import csv
 from pathlib import Path
-import numpy as np
 import datetime
+import toml
+import numpy as np
 
 from evaluation.runner import Runner
 from evaluation import testrooms
@@ -87,12 +87,12 @@ def run_experiment(iterations=1):
     positions = []
     while current_iteration <= iterations:
         for algo_conf in algo_configurations(algo_sel):
-            # print("Selected configuration:")
-            # print("  Clustering algorithm:", algo_conf[STR_CLUSTERING])
-            # print("  Wall normal algorithm:", algo_conf[STR_WALL_NORMAL])
-            # print("  Wall selection algorithm:", algo_conf[STR_WALL_SELECTION])
-            # print("  Localization algorithm:", algo_conf[STR_LOCALIZATION])
-            # print("  iteration:", current_iteration)
+            print("Selected configuration:")
+            print("  Clustering algorithm:", algo_conf[STR_CLUSTERING])
+            print("  Wall normal algorithm:", algo_conf[STR_WALL_NORMAL])
+            print("  Wall selection algorithm:", algo_conf[STR_WALL_SELECTION])
+            print("  Localization algorithm:", algo_conf[STR_LOCALIZATION])
+            print("  iteration:", current_iteration)
 
             positions = Runner.run_experiment(
                 testrooms.CUBE,
@@ -108,54 +108,16 @@ def run_experiment(iterations=1):
                 current_iteration,
             )
             export_experiment_results(
-                timestamp, algo_conf, iteration, positions
+                timestamp,
+                current_iteration == iterations,
+                algo_conf[STR_CLUSTERING],
+                algo_conf[STR_WALL_NORMAL],
+                algo_conf[STR_WALL_SELECTION],
+                algo_conf[STR_LOCALIZATION],
+                positions,
             )
         current_iteration += 1
     return positions
 
 
 run_experiment(NUM_ITERATIONS)
-
-
-res_dir = "/".join(
-    [
-        "results",
-        str(
-            datetime.datetime.now()
-            .replace(second=0, microsecond=0)
-            .isoformat()
-        ),
-    ]
-).lower()
-
-
-for algo_conf in algo_configurations(algo_sel):
-    positions = run_experiment(algo_conf, NUM_ITERATIONS)
-    name_clustering = str(algo_conf[STR_CLUSTERING]).split(".")[-1]
-    name_wall_normal = str(algo_conf[STR_WALL_NORMAL]).split(".")[-1]
-    name_wall_selection = str(algo_conf[STR_WALL_SELECTION]).split(".")[-1]
-    name_localization = str(algo_conf[STR_LOCALIZATION]).split(".")[-1]
-    res_name = (
-        f"{name_clustering}-"
-        + f"{name_wall_normal}-"
-        + f"{name_wall_selection}-"
-        + f"{name_localization}.csv"
-    )
-    Path(res_dir).mkdir(parents=True, exist_ok=True)
-    with open(f"{res_dir}/{res_name}", "w", newline="") as file:
-        csvwriter = csv.writer(
-            file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
-        )
-        csvwriter.writerow(
-            ["computed position", "original position", "offset"]
-        )
-        for position in positions:
-            csvwriter.writerow(
-                [
-                    str(position["computed"]),
-                    str(position["original"]),
-                    np.linalg.norm(
-                        position["computed"] - position["original"]
-                    ),
-                ]
-            )
