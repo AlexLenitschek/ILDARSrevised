@@ -12,9 +12,12 @@ num_senders = 10
     z = 0.3
 
 [error]
-von_mises_concentration = 131.312 # expected 5 deg angular std. deviation
-delta_error = 0.1 # 10cm standard deviation
-wall_error = 0.05 # 5% of reflection will wrongly be assigned
+#von_mises_concentration = 131.312 # expected 5 deg angular std. deviation
+#delta_error = 0.1 # 10cm standard deviation
+#wall_error = 0.05 # 5% of reflection will wrongly be assigned
+von_mises_concentration = 0
+delta_error = 0
+wall_error = 0
 
 [algorithms]
 
