@@ -1,0 +1,17 @@
+name: Run ILDARS Evaluation
+on: [push]
+jobs:
+  run-evaluation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Pipend
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: install -d
+          
+      - name: Run Evaluation
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: run python3 -m evaluation

@@ -13,6 +13,7 @@ numpy = "==1.23.1"
 toml = "*"
 scikit-spatial = "*"
 networkx = "*"
+pandas = "*"
 
 [dev-packages]
 flake8 = "*"

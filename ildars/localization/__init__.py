@@ -8,8 +8,6 @@ import ildars.localization.averaging as av
 def compute_sender_positions(
     loc_algo,
     reflection_clusters,
-    direct_signals,
-    reflected_signals,
     wall_sel_algorithm,
 ):
     averaging_method = av.AveragingMethod.UNWEIGHTED

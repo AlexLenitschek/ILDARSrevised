@@ -7,9 +7,14 @@ from scipy.stats import vonmises_line, uniform, norm
 import ildars.math_utils as util
 
 
-def simulate_reflection_error(
-    reflected_signals, von_mises_error, delta_error, wall_error, direct_signals
+def simulate_error(
+    direct_signals, reflected_signals, von_mises_error, delta_error, wall_error
 ):
+    for signal in direct_signals:
+        if von_mises_error > 0:
+            signal.direction = simulate_directional_error(
+                signal.direction, von_mises_error
+            )
     for signal in reflected_signals:
         if von_mises_error > 0:
             signal.direction = simulate_directional_error(
@@ -21,7 +26,7 @@ def simulate_reflection_error(
         reflected_signals = simulate_wall_error(
             reflected_signals, wall_error, direct_signals
         )
-    return reflected_signals
+    return (direct_signals, reflected_signals)
 
 
 def simulate_directional_error(vector, von_mises_error):

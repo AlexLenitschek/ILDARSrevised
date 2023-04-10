@@ -1,5 +1,4 @@
 from enum import Enum
-import numpy as np
 
 from .direction import (
     compute_direction_from_pairs,
@@ -21,20 +20,25 @@ WallNormalAlgorithm = Enum(
 
 
 def compute_wall_normal_vector(wall_normal_algorithm, reflection_cluster):
+    direction = None
     if wall_normal_algorithm is WallNormalAlgorithm.ALL_PAIRS:
-        compute_direction_from_pairs(reflection_cluster, STR_ALL)
+        direction = compute_direction_from_pairs(reflection_cluster, STR_ALL)
     elif wall_normal_algorithm is WallNormalAlgorithm.LINEAR_ALL_PAIRS:
-        compute_direction_all_pairs_linear(reflection_cluster)
+        direction = compute_direction_all_pairs_linear(reflection_cluster)
     elif wall_normal_algorithm is WallNormalAlgorithm.OVERLAPPING_PAIRS:
-        compute_direction_from_pairs(reflection_cluster, STR_OVERLAPPING)
+        direction = compute_direction_from_pairs(
+            reflection_cluster, STR_OVERLAPPING
+        )
     elif wall_normal_algorithm is WallNormalAlgorithm.DISJOINT_PAIRS:
-        compute_direction_from_pairs(reflection_cluster, STR_DISJOINT)
+        direction = compute_direction_from_pairs(
+            reflection_cluster, STR_DISJOINT
+        )
     else:
         raise NotImplementedError(
             "Wall normal vector computation algorithm",
             wall_normal_algorithm,
             "is not known.",
         )
-    direction = reflection_cluster.wall_normal
     distance = compute_distance(direction, reflection_cluster)
     reflection_cluster.wall_normal = direction * distance
+    return reflection_cluster
