@@ -33,5 +33,12 @@
                 "evaluation",
             ]
         },
+        {
+            "name": "Upload results to google drive",
+            "type": "python",
+            "console": "internalConsole",
+            "request": "launch",
+            "program": "google-drive-upload/upload-to-google-drive.py"
+        },
     ]
 }
