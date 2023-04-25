@@ -1,5 +1,11 @@
+import os
+
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
+
+# Go to script location
+directory = os.path.dirname(os.path.abspath(__file__))
+os.chdir(directory)
 
 gauth = GoogleAuth()
 drive = GoogleDrive(gauth)

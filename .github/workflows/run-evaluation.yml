@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Setup Pipend
+      - name: Setup Pipenv
         uses: VaultVulp/action-pipenv@v2.0.1
         with:
           command: install -d
@@ -19,4 +19,4 @@ jobs:
       - name: Upload to Google Drive
         uses: VaultVulp/action-pipenv@v2.0.1
         with:
-          command: run python3 upload-to-google-drive.py
+          command: run python3 google-drive-upload/upload-to-google-drive.py
