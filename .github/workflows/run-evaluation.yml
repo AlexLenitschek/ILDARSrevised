@@ -15,3 +15,8 @@ jobs:
         uses: VaultVulp/action-pipenv@v2.0.1
         with:
           command: run python3 -m evaluation
+          
+      - name: Upload to Google Drive
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: run python3 upload-to-google-drive.py
