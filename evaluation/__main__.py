@@ -4,6 +4,8 @@ import datetime
 import toml
 import numpy as np
 
+from ildars.localization.sender_localization import LocalizationAlgorithm
+
 from evaluation.runner import Runner
 from evaluation import testrooms
 from evaluation.export_results import export_experiment_results
@@ -55,6 +57,18 @@ def algo_configurations(algo_sel):
         and i_wall_selection < len(algo_sel[STR_WALL_SELECTION])
         and i_localization < len(algo_sel[STR_LOCALIZATION])
     ):
+        # We need a special case for closest lines extended
+        if algo_sel[STR_LOCALIZATION][
+            i_localization
+        ] == LocalizationAlgorithm.CLOSEST_LINES_EXTENDED and (
+            i_wall_selection < len(algo_sel[STR_WALL_SELECTION]) - 1
+        ):
+            # increase indices
+            if i_localization < len(algo_sel[STR_LOCALIZATION]) - 1:
+                i_localization += 1
+            else:
+                i_localization = 0
+                i_wall_selection += 1
         yield {
             STR_CLUSTERING: algo_sel[STR_CLUSTERING][i_clustering],
             STR_WALL_NORMAL: algo_sel[STR_WALL_NORMAL][i_wall_normal],

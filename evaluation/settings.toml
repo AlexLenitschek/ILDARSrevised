@@ -2,22 +2,19 @@
 
 [general]
 # Visualization will be generated iff. iterations are set to 1
-iterations = 2
+iterations = 50
 random_receiver = false
-num_senders = 10
+num_senders = 20
     
     [general.receiver_position]
-    x = 0.1
-    y = 0.2
-    z = 0.3
+    x = 0
+    y = 0
+    z = 0
 
 [error]
-#von_mises_concentration = 131.312 # expected 5 deg angular std. deviation
-#delta_error = 0.1 # 10cm standard deviation
-#wall_error = 0.05 # 5% of reflection will wrongly be assigned
-von_mises_concentration = 0
-delta_error = 0
-wall_error = 0
+von_mises_concentration = 0 # expected 5 deg angular std. deviation
+delta_error = 0 # 10cm standard deviation
+wall_error = 0 # 5% of reflection will wrongly be assigned
 
 [algorithms]
 

@@ -38,6 +38,13 @@ def export_experiment_results(
         == len(positions_computed)
         == len(positions_offsets)
     )
+    # For exporting, transform np arrays to space separated strings
+    positions_original = [
+        " ".join(map(str, pos)) for pos in positions_original
+    ]
+    positions_computed = [
+        " ".join(map(str, pos)) for pos in positions_computed
+    ]
     new_positions = pd.DataFrame(
         {
             STR_POS_ORIGINAL: positions_original,
@@ -62,6 +69,6 @@ def export_experiment_results(
         result_path = "/".join(["results", timestamp, res_name])
         filepath = Path(result_path)
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        _tables[algo_cl][algo_wn][algo_ws][algo_loc].to_csv(filepath)
+        _tables[algo_cl][algo_wn][algo_ws][algo_loc].to_csv(filepath, sep=",")
         # Export to csv if current iteration is the last
     return new_positions
