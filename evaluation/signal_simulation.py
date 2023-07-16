@@ -31,6 +31,11 @@ def generate_measurements(receiver_position, room, num_senders):
         ]
         for face in room_triangle_indices
     ]
+    # compute actual wall normal vectors
+    wall_nv = [
+        util.normalize(np.cross(tri[1] - tri[0], tri[2] - tri[0]))
+        for tri in room_triangles
+    ]
     # random sender positions
     sender_positions = [
         np.array(
@@ -88,7 +93,7 @@ def generate_measurements(receiver_position, room, num_senders):
             reflected_signals.append(new_ref_sig)
             reflection_index += 1
 
-    return (direct_signals, reflected_signals)
+    return (direct_signals, reflected_signals, wall_nv)
 
 
 def get_line_triangle_intersection(line_point, line_direction, triangle):

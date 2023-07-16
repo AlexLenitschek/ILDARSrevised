@@ -66,8 +66,10 @@ def compute_reflection_clusters(reflected_signals):
             closest_multi_line_bin.add_line(line)
         else:
             bins.append(Bin(line))
-
-    # Return found clusters. TODO: transform to one-liner
+    # Throw away small bins
+    max_bin_size = len(max([b.lines for b in bins], key=len))
+    bins = [b for b in bins if len(b.lines) >= np.floor(0.25 * max_bin_size)]
+    # Return found clusters.
     clusters = []
     for bin in bins:
         clusters.append(

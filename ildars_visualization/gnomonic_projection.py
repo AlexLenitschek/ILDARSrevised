@@ -19,6 +19,6 @@ def plot_clipping(
     plt.show()
 
 
-def plot_hemisphere_connectivity_graph(g):
+def plot_hemisphere_connectivity_graph(g, name):
     nx.draw(g, with_labels=True)
-    plt.show()
+    plt.savefig(f"{name}.svg")

@@ -10,6 +10,7 @@ class Runner:
     _simulated_signals = {}
     _clusters = {0: {}}
     _wall_normals = {0: {}}  # clusters with wall n.v.
+    _actual_wall_normals = {0: {}}
 
     @staticmethod
     def run_experiment(
@@ -60,16 +61,20 @@ class Runner:
     ):
         if iteration not in Runner._simulated_signals:
             del Runner._simulated_signals  # Free unused iterations from memory
-            new_measurements = generate_measurements(
-                receiver_position, room, num_senders
-            )
+            (
+                direct_signals,
+                reflected_signals,
+                wall_nv,
+            ) = generate_measurements(receiver_position, room, num_senders)
             new_measurements = simulate_error(
-                *new_measurements,
+                direct_signals,
+                reflected_signals,
                 von_mises_error,
                 delta_error,
                 wall_error,
             )
             Runner._simulated_signals = {iteration: new_measurements}
+            Runner._actual_wall_normals[iteration] = wall_nv
         return Runner._simulated_signals[iteration]
 
     @staticmethod
