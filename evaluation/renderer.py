@@ -1,3 +1,5 @@
+import sys
+sys.path.append ('../ILDARSrevised')
 import os
 import vedo
 

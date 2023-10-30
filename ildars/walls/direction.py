@@ -1,3 +1,6 @@
+import sys
+sys.path.append ('../ILDARSrevised')
+
 import itertools
 
 import numpy as np
@@ -8,6 +11,12 @@ STR_ALL = "all"
 STR_DISJOINT = "disjoint"
 STR_OVERLAPPING = "overlapping"
 
+#fix to AttributeError: module 'itertools' has no attribute 'pairwise'
+
+def pairwise(iterable):
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 def compute_direction_from_pairs(
     reflection_cluster, pair_selection_method=STR_ALL
@@ -59,9 +68,9 @@ def get_pairs(elements, method):
     if method == STR_ALL:
         return list(itertools.combinations(elements, 2))[1:]
     if method == STR_OVERLAPPING:
-        return itertools.pairwise(elements[1:])
+        return pairwise(elements[1:])
     if method == STR_DISJOINT:
-        pairs = itertools.pairwise(elements[1:])
+        pairs = pairwise(elements[1:])
         return itertools.islice(pairs, None, None, 2)
 
 

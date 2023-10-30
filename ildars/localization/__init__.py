@@ -1,3 +1,6 @@
+import sys
+sys.path.append ('../ILDARSrevised')
+
 from enum import Enum
 
 import ildars.localization.wall_selection as ws

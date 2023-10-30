@@ -1,6 +1,7 @@
 """Functions for simulating error on previously generated measurements
 """
-
+import sys
+sys.path.append ('../ILDARSrevised')
 import numpy as np
 from scipy.stats import vonmises_line, uniform, norm
 

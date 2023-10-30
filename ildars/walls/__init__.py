@@ -1,13 +1,16 @@
+import sys
+sys.path.append ('../ILDARSrevised')
+
 from enum import Enum
 
-from .direction import (
+from ildars.walls.direction import (
     compute_direction_from_pairs,
     compute_direction_all_pairs_linear,
     STR_ALL,
     STR_DISJOINT,
     STR_OVERLAPPING,
 )
-from .distance import compute_distance
+from ildars.walls.distance import compute_distance
 
 # Contains all methods for wall normal vector computation
 # Functions take as input a set of measurements (here we use the

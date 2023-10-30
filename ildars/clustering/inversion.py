@@ -1,4 +1,6 @@
 # Implementation of "Lines into Bins" algorithm by Milan Müller
+import sys
+sys.path.append ('../ILDARSrevised')
 import numpy as np
 import math
 from enum import Enum

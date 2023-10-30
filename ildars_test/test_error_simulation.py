@@ -1,5 +1,7 @@
 # tests for the error simulation. Since the error simulation uses random
 # distributions, this file only prints expected, vs. actual std. deviation.
+import sys
+sys.path.append ('../ILDARSrevised')
 import numpy as np
 from scipy.stats import vonmises_line, cramervonmises, circstd
 

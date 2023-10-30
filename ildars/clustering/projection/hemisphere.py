@@ -1,3 +1,6 @@
+import sys
+sys.path.append ('../ILDARSrevised')
+
 import itertools
 import numpy as np
 import scipy as sp
@@ -8,7 +11,7 @@ from skspatial.objects import Plane, Line, Circle
 import ildars_visualization.gnomonic_projection as viz
 
 import ildars.math_utils as math_util
-from . import util
+from ildars.clustering.projection import util
 
 # Threshold for detecting, whether a given arc is on a given hemisphere
 # Threshold is directly taken from Rico Gießlers code, assuming the flag for

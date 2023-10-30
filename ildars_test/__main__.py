@@ -1,4 +1,6 @@
 # Collection of all tests for ildars and evaluation modules
+import sys
+sys.path.append ('../ILDARSrevised')
 from ildars_test import test_error_simulation
 from ildars_test import inversion_test
 

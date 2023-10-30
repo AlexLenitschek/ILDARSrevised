@@ -1,3 +1,6 @@
+import sys
+sys.path.append ('../ILDARSrevised')
+
 from enum import Enum
 
 import ildars.math_utils as util

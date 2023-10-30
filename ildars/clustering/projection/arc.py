@@ -1,3 +1,6 @@
+import sys
+sys.path.append ('../ILDARSrevised')
+
 import numpy as np
 
 import ildars.math_utils as util

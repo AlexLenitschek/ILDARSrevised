@@ -1,10 +1,12 @@
 """
 Basic classes and main function of the ILDARS pipeline.
 """
-from .reflected_signal import ReflectedSignal
-from . import clustering
-from . import walls
-from . import localization
+import sys
+sys.path.append ('../ILDARSrevised')
+from ildars.reflected_signal import ReflectedSignal
+from ildars import clustering
+from ildars import walls
+from ildars import localization
 
 
 def run_ildars(

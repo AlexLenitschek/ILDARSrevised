@@ -1,3 +1,5 @@
+import sys
+sys.path.append ('../ILDARSrevised')
 import random
 
 import numpy as np

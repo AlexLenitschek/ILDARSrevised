@@ -1,4 +1,6 @@
 # Unit tests for inversion helper functions
+import sys
+sys.path.append ('../ILDARSrevised')
 import ildars.clustering.inversion as inversion
 
 # We consider number n,m equal if abs(n-m) < EPSILON

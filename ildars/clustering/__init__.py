@@ -1,6 +1,8 @@
+import sys
+sys.path.append ('../ILDARSrevised')
 from enum import Enum
-from . import inversion
-from . import projection
+from ildars.clustering import inversion
+from ildars.clustering import projection
 
 ClusteringAlgorithm = Enum(
     "ClusteringAlgorithm", ["INVERSION", "GNOMONIC_PROJECTION"]

@@ -1,3 +1,5 @@
+import sys
+sys.path.append ('../ILDARSrevised')
 from ildars import clustering
 from ildars import walls
 from ildars import localization

@@ -1,4 +1,7 @@
 # Main File of the gnomonic projection clustering algorithm
+import sys
+sys.path.append ('../ILDARSrevised')
+
 import itertools
 import networkx as nx
 
@@ -6,9 +9,13 @@ from ildars.reflected_signal import ReflectedSignal
 from ildars.clustering.cluster import ReflectionCluster
 import ildars_visualization.gnomonic_projection as viz
 
-from .arc import Arc
-from .hemisphere import Hemisphere
+from ildars.clustering.projection.arc import Arc
+from ildars.clustering.projection.hemisphere import Hemisphere
 
+def pairwise(iterable):
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 def compute_reflection_clusters(reflected_signals):
     hemispheres = Hemisphere.get_12_hemispheres()
@@ -32,7 +39,7 @@ def find_clusters(hemispheres):
     while len(intersection_graphs) > 1:
         intersection_graphs = [
             nx.compose(*pair)
-            for pair in itertools.pairwise(intersection_graphs)
+            for pair in pairwise(intersection_graphs)
         ]
     g = intersection_graphs[0]
     # Visualization

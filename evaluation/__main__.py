@@ -1,3 +1,5 @@
+import sys
+sys.path.append ('../ILDARSrevised')
 import csv
 from pathlib import Path
 import datetime
@@ -93,9 +95,17 @@ def algo_configurations(algo_sel):
 
 
 def run_experiment(iterations=1):
-    timestamp = str(
-        datetime.datetime.now().replace(second=0, microsecond=0).isoformat()
-    )
+    # Get the current date and time
+    current_datetime = datetime.datetime.now()
+    # Format the date and time as a string (e.g., "2023-10-30_14-25-30")
+    timestamp = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+    # Above is an Alternative to the version below as this had some 
+    # syntaxerrors with Windows namingconvention
+    
+    # timestamp = 
+    #     str(
+    #     datetime.datetime.now().replace(second=0, microsecond=0).isoformat()
+    # )
 
     current_iteration = 1
     positions = []

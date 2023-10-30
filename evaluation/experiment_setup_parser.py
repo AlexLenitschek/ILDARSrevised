@@ -1,3 +1,5 @@
+import sys
+sys.path.append ('../ILDARSrevised')
 from ildars.clustering import ClusteringAlgorithm
 from ildars.localization.wall_selection import WallSelectionMethod
 from ildars.walls import WallNormalAlgorithm

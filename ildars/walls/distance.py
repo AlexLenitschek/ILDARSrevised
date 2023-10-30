@@ -1,3 +1,8 @@
+import sys
+sys.path.append ('../ILDARSrevised')
+
+from ildars import math_utils  # Import the module from the 'ildars' package
+
 import numpy as np
 
 import ildars.math_utils as util
