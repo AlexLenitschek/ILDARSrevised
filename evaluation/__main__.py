@@ -107,7 +107,7 @@ def run_experiment(iterations=100):
     #)
 
     current_iteration = 1
-    iterations = 100
+    iterations = 500
     positions = []
     while current_iteration <= iterations:
         for algo_conf in algo_configurations(algo_sel):
