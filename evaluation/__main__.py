@@ -94,7 +94,7 @@ def algo_configurations(algo_sel):
             i_clustering += 1
 
 
-def run_experiment(iterations=100):
+def run_experiment(iterations=1):
     # Get the current date and time
     current_datetime = datetime.datetime.now()
     # Format the date and time as a string (e.g., "2023-10-30_14-25-30")
@@ -107,7 +107,7 @@ def run_experiment(iterations=100):
     #)
 
     current_iteration = 1
-    iterations = 500
+    #iterations = 500
     positions = []
     while current_iteration <= iterations:
         for algo_conf in algo_configurations(algo_sel):
