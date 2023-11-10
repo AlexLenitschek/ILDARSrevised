@@ -101,7 +101,6 @@ def run_experiment(iterations=1):
     timestamp = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
     # Above is an Alternative to the version below as this had some 
     # syntaxerrors with Windows namingconvention
-    
     #timestamp = str(
     #     datetime.datetime.now()#.replace(second=0, microsecond=0).isoformat()
     #)
