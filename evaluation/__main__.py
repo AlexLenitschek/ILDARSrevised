@@ -118,7 +118,7 @@ def run_experiment(iterations=1):
             print("  iteration:", current_iteration)
 
             positions = Runner.run_experiment(
-                testrooms.CUBE,
+                testrooms.TEST1ROOM,
                 receiver_position,
                 NUM_SENDERS,
                 VON_MISES_CONCENTRATION,
