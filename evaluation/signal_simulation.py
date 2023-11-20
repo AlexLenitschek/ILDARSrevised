@@ -39,12 +39,26 @@ def generate_measurements(receiver_position, room, num_senders):
         for tri in room_triangles
     ]
     # random sender positions
+    # Following this are the old senderpositions for CUBE
+    # sender_positions = [
+    #     np.array(
+    #         [
+    #             random.uniform(-1, 1),
+    #             random.uniform(-1, 1),
+    #             random.uniform(-1, 1),
+    #         ]
+    #     )
+    #     - receiver_position
+    #     for i in range(num_senders)
+    # ]
+
+    # Senderpositions for test1room
     sender_positions = [
         np.array(
             [
-                random.uniform(-1, 1),
-                random.uniform(-1, 1),
-                random.uniform(-1, 1),
+                random.uniform(-2.1, 2.1),
+                random.uniform(-1.6, 1.6),
+                random.uniform(-0.9, 0.9),
             ]
         )
         - receiver_position
