@@ -11,3 +11,4 @@ HAUS_DES_NIKOLAUS= pywavefront.Wavefront(os.path.join(script_path, "models/haus_
 SLOPE = pywavefront.Wavefront(os.path.join(script_path, "models/slope.obj"), collect_faces=True)
 TELEVISION = pywavefront.Wavefront(os.path.join(script_path, "models/television.obj"), collect_faces=True)
 WINDOW = pywavefront.Wavefront(os.path.join(script_path, "models/window.obj"), collect_faces=True)
+TEST1ROOM = pywavefront.Wavefront(os.path.join(script_path, "models/test1room.obj"), collect_faces=True)
