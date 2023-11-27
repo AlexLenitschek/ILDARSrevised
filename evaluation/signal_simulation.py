@@ -57,8 +57,8 @@ def generate_measurements(receiver_position, room, num_senders):
         np.array(
             [
                 random.uniform(-2.1, 2.1),
-                random.uniform(-1.6, 1.6),
                 random.uniform(-0.9, 0.9),
+                random.uniform(-1.6, 1.6),
             ]
         )
         - receiver_position
