@@ -11,6 +11,34 @@ from ildars.direct_signal import DirectSignal
 # "Small" number that the determinant is compared to
 EPSILON = 0.000000001
 
+# FOR PYRAMIDROOM Corner coordinates of the trapezoid
+bottom_surface = np.array([(1, 0.5, 0.5), (1, 0.5, -0.5), (-1, 0.5, -0.5), (-1, 0.5, 0.5)])
+top_surface = np.array([(0.5, -0.5, 0.25), (0.5, -0.5, -0.25), (-0.5, -0.5, -0.25), (-0.5, -0.5, 0.25)])
+center = np.array([0, 0, 0])
+
+# FOR PYRAMIDROOM Calculate smaller trapezoid for boundary
+offset = 0.1  # Distance from the original trapezoid
+boundary_bottom_surface = bottom_surface - ((bottom_surface - center) / np.linalg.norm(bottom_surface - center)) * offset
+boundary_top_surface = top_surface - ((top_surface - center) / np.linalg.norm(top_surface - center)) * offset
+
+# FOR PYRAMIDROOM Combine top and bottom surface coordinates for the boundary trapezoid
+boundary_trapezoid = np.vstack((boundary_bottom_surface, boundary_top_surface))
+
+# FOR PYRAMIDROOM Generate random sender positions inside the boundary trapezoid
+def generate_random_point_in_boundary_trapezoid():
+    while True:
+        x = random.uniform(min(boundary_trapezoid[:, 0]), max(boundary_trapezoid[:, 0]))
+        y = random.uniform(min(boundary_trapezoid[:, 1]), max(boundary_trapezoid[:, 1]))
+        z = random.uniform(min(boundary_trapezoid[:, 2]), max(boundary_trapezoid[:, 2]))
+
+        # Check if the point falls within the boundary trapezoid
+        if any(
+            [
+                (boundary_trapezoid[i, 0] == x and boundary_trapezoid[i, 1] == y and boundary_trapezoid[i, 2] == z)
+                for i in range(len(boundary_trapezoid))
+            ]
+        ):
+            return np.array([x, y, z])
 
 def generate_measurements(receiver_position, room, num_senders):
     direct_signals = []
@@ -38,6 +66,7 @@ def generate_measurements(receiver_position, room, num_senders):
         util.normalize(np.cross(tri[1] - tri[0], tri[2] - tri[0]))
         for tri in room_triangles
     ]
+
     # random sender positions
     # Following this are the old senderpositions for CUBE
     # sender_positions = [
@@ -52,18 +81,25 @@ def generate_measurements(receiver_position, room, num_senders):
     #     for i in range(num_senders)
     # ]
 
-    # Senderpositions for test1room
-    sender_positions = [
-        np.array(
-            [
-                random.uniform(-2.1, 2.1),
-                random.uniform(-0.9, 0.9),
-                random.uniform(-1.6, 1.6),
-            ]
-        )
-        - receiver_position
-        for i in range(num_senders)
+    # Senderpositions for the rooms
+
+    # sender_positions = [ # THIS IS FOR TEST1ROOM
+    #     np.array(
+    #          [
+    #              random.uniform(-2.1, 2.1),
+    #              random.uniform(-0.9, 0.9),
+    #              random.uniform(-1.6, 1.6),
+    #          ]
+    #     )
+    #     - receiver_position
+    #     for i in range(num_senders)
+    # ]
+
+    sender_positions = [ # THIS IS FOR PYRAMIDROOM
+        generate_random_point_in_boundary_trapezoid()
+        for _ in range(num_senders)
     ]
+
     for sender_position in sender_positions:
         # Compute direct signal direction and length
         direct_signal_direction = sender_position

@@ -106,7 +106,7 @@ def run_experiment(iterations=1):
     #)
 
     current_iteration = 1
-    iterations = 500
+    #iterations = 500
     positions = []
     while current_iteration <= iterations:
         for algo_conf in algo_configurations(algo_sel):
@@ -118,7 +118,7 @@ def run_experiment(iterations=1):
             print("  iteration:", current_iteration)
 
             positions = Runner.run_experiment(
-                testrooms.TEST1ROOM,
+                testrooms.PYRAMIDROOM,
                 receiver_position,
                 NUM_SENDERS,
                 VON_MISES_CONCENTRATION,
