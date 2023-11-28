@@ -83,22 +83,22 @@ def generate_measurements(receiver_position, room, num_senders):
 
     # Senderpositions for the rooms
 
-    # sender_positions = [ # THIS IS FOR TEST1ROOM
-    #     np.array(
-    #          [
-    #              random.uniform(-2.1, 2.1),
-    #              random.uniform(-0.9, 0.9),
-    #              random.uniform(-1.6, 1.6),
-    #          ]
-    #     )
-    #     - receiver_position
-    #     for i in range(num_senders)
-    # ]
-
-    sender_positions = [ # THIS IS FOR PYRAMIDROOM
-        generate_random_point_in_boundary_trapezoid()
-        for _ in range(num_senders)
+    sender_positions = [ # THIS IS FOR TEST1ROOM
+        np.array(
+             [
+                 random.uniform(-2.1, 2.1),
+                 random.uniform(-0.9, 0.9),
+                 random.uniform(-1.6, 1.6),
+             ]
+        )
+        - receiver_position
+        for i in range(num_senders)
     ]
+
+    # sender_positions = [ # THIS IS FOR PYRAMIDROOM
+    #     generate_random_point_in_boundary_trapezoid()
+    #     for j in range(num_senders)
+    # ]
 
     for sender_position in sender_positions:
         # Compute direct signal direction and length
