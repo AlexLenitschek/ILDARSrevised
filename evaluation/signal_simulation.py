@@ -10,35 +10,178 @@ from ildars.direct_signal import DirectSignal
 
 # "Small" number that the determinant is compared to
 EPSILON = 0.000000001
+#center = np.array([0, 0, 0])   
+# Define offset (distance from faces)
+concert_offset = 0.1  # Change this value as needed
+# Define offset for pyramidroom (distance from faces)
+offset = 0.1  # Change this value as needed
 
-# FOR PYRAMIDROOM Corner coordinates of the trapezoid
-bottom_surface = np.array([(1, 0.5, 0.5), (1, 0.5, -0.5), (-1, 0.5, -0.5), (-1, 0.5, 0.5)])
-top_surface = np.array([(0.5, -0.5, 0.25), (0.5, -0.5, -0.25), (-0.5, -0.5, -0.25), (-0.5, -0.5, 0.25)])
-center = np.array([0, 0, 0])
+###############################################################################################################################################
+#THIS IS FOR PYRAMIDROOM - PUT OTHER ROOMS IN COMMENTS WHEN RUNNING PYRAMIDROOM
+###############################################################################################################################################
 
-# FOR PYRAMIDROOM Calculate smaller trapezoid for boundary
-offset = 0.1  # Distance from the original trapezoid
-boundary_bottom_surface = bottom_surface - ((bottom_surface - center) / np.linalg.norm(bottom_surface - center)) * offset
-boundary_top_surface = top_surface - ((top_surface - center) / np.linalg.norm(top_surface - center)) * offset
+# Define vertices (replace with your actual vertex coordinates)
+vertices = {
+    'pA': np.array([1, 0.5, 0.5]),
+    'pB': np.array([1, 0.5, -0.5]),
+    'pC': np.array([-1, 0.5, -0.5]),
+    'pD': np.array([-1, 0.5, 0.5]),
+    'pE': np.array([0.5, -0.5, 0.25]),
+    'pF': np.array([0.5, -0.5, -0.25]),
+    'pG': np.array([-0.5, -0.5, -0.25]),
+    'pH': np.array([-0.5, -0.5, 0.25]),
 
-# FOR PYRAMIDROOM Combine top and bottom surface coordinates for the boundary trapezoid
-boundary_trapezoid = np.vstack((boundary_bottom_surface, boundary_top_surface))
+}
 
-# FOR PYRAMIDROOM Generate random sender positions inside the boundary trapezoid
-def generate_random_point_in_boundary_trapezoid():
+# Define faces based on connectivity (All anticlockwise)
+faces = [
+    ['pA', 'pB', 'pC', 'pD'],
+    ['pA', 'pD', 'pH', 'pE'],
+    ['pA', 'pE', 'pF', 'pB'],
+    ['pG', 'pF', 'pE', 'pH'],
+    ['pG', 'pH', 'pD', 'pC'],
+    ['pG', 'pC', 'pB', 'pF'] 
+]
+
+# Access the minimum and maximum values for x, y, and z coordinates
+min_x = np.min([vertex[0] for vertex in vertices.values()])
+max_x = np.max([vertex[0] for vertex in vertices.values()])
+
+min_y = np.min([vertex[1] for vertex in vertices.values()])
+max_y = np.max([vertex[1] for vertex in vertices.values()])
+
+min_z = np.min([vertex[2] for vertex in vertices.values()])
+max_z = np.max([vertex[2] for vertex in vertices.values()])
+
+# Calculate the center of the shape (mean of all vertices)
+center = np.mean(list(vertices.values()), axis=0)
+
+# Calculate normals for each face
+face_normals = {}
+for face_vertices in faces:
+    vertices_list = [vertices[vertex] for vertex in face_vertices]
+    vectors = [vertices_list[i + 1] - vertices_list[i] for i in range(len(vertices_list) - 1)]
+    vectors.append(vertices_list[0] - vertices_list[-1])  # Connect last vertex to first
+    
+    normal = np.cross(vectors[0], vectors[1])
+    face_normals[tuple(face_vertices)] = normal / np.linalg.norm(normal)
+
+# Define offset (distance from faces)
+offset = 0.1  # Change this value as needed
+
+# Check if a point is inside the shape considering the offset
+def is_point_inside(point):
+    for normal in face_normals.values():
+        vec_to_center = center - point
+        if np.dot(normal, vec_to_center) < -offset:
+            return False
+    return True
+
+# Function to generate random points outside the offset distance from the faces
+def generate_random_point():
     while True:
-        x = random.uniform(min(boundary_trapezoid[:, 0]), max(boundary_trapezoid[:, 0]))
-        y = random.uniform(min(boundary_trapezoid[:, 1]), max(boundary_trapezoid[:, 1]))
-        z = random.uniform(min(boundary_trapezoid[:, 2]), max(boundary_trapezoid[:, 2]))
+        x = random.uniform(min_x, max_x)
+        y = random.uniform(min_y, max_y)
+        z = random.uniform(min_z, max_z)
+        point = np.array([x, y, z])
 
-        # Check if the point falls within the boundary trapezoid
-        if any(
-            [
-                (boundary_trapezoid[i, 0] == x and boundary_trapezoid[i, 1] == y and boundary_trapezoid[i, 2] == z)
-                for i in range(len(boundary_trapezoid))
-            ]
-        ):
-            return np.array([x, y, z])
+        for face_vertices in faces:
+            vertices_list = [vertices[vertex] for vertex in face_vertices]
+            face_center = np.mean(vertices_list, axis=0)
+            face_normal = np.cross(vertices_list[1] - vertices_list[0], vertices_list[2] - vertices_list[1])
+            face_normal /= np.linalg.norm(face_normal)
+            vec_to_face = face_center - point
+            distance_to_face = np.dot(vec_to_face, face_normal)
+
+            if distance_to_face < offset:
+                break  # Point is inside the offset distance from this face
+        else:
+            print(point)
+            return point  # Point is outside the offset distance from all faces
+        
+###############################################################################################################################################
+#SAME BUT FOR THE CONCERTHALL - PUT OTHER ROOMS IN COMMENTS WHEN RUNNING CONCERTHALL
+###############################################################################################################################################
+
+# # Define vertices (replace with your actual vertex coordinates)
+# concert_vertices = {
+#     'cA': np.array([5.5, 0.8, 4.5]),
+#     'cB': np.array([5.5, 0.8, -4.5]),
+#     'cC': np.array([-4.5, 2.3, -1.2]),
+#     'cD': np.array([-4.5, 2.3, 1.6]),
+#     'cE': np.array([5.5, -4.0, 4.5]),
+#     'cF': np.array([5.5, -4.0, -4.5]),
+#     'cG': np.array([-4.5, 0.2, -1.2]),
+#     'cH': np.array([-4.5, 0.2, 1.6]),
+
+# }
+
+# # Define faces based on connectivity (All anticlockwise)
+# concert_faces = [
+#     ['cA', 'cB', 'cC', 'cD'],
+#     ['cA', 'cD', 'cH', 'cE'],
+#     ['cA', 'cE', 'cF', 'cB'],
+#     ['cG', 'cF', 'cE', 'cH'],
+#     ['cG', 'cH', 'cD', 'cC'],
+#     ['cG', 'cC', 'cB', 'cF'] 
+# ]
+
+# # Access the minimum and maximum values for x, y, and z coordinates
+# concert_min_x = np.min([vertex[0] for vertex in concert_vertices.values()])
+# concert_max_x = np.max([vertex[0] for vertex in concert_vertices.values()])
+
+# concert_min_y = np.min([vertex[1] for vertex in concert_vertices.values()])
+# concert_max_y = np.max([vertex[1] for vertex in concert_vertices.values()])
+
+# concert_min_z = np.min([vertex[2] for vertex in concert_vertices.values()])
+# concert_max_z = np.max([vertex[2] for vertex in concert_vertices.values()])
+
+# # Calculate the center of the shape (mean of all vertices)
+# concert_center = np.mean(list(concert_vertices.values()), axis=0)
+
+# # Calculate normals for each face
+# concert_face_normals = {}
+# for concert_face_vertices in concert_faces:
+#     concert_vertices_list = [concert_vertices[concert_vertex] for concert_vertex in concert_face_vertices]
+#     concert_vectors = [concert_vertices_list[c + 1] - concert_vertices_list[c] for c in range(len(concert_vertices_list) - 1)]
+#     concert_vectors.append(concert_vertices_list[0] - concert_vertices_list[-1])  # Connect last vertex to first
+    
+#     concert_normal = np.cross(concert_vectors[0], concert_vectors[1])
+#     concert_face_normals[tuple(concert_face_vertices)] = concert_normal / np.linalg.norm(concert_normal)
+
+# # Check if a point is inside the shape considering the offset
+# def is_point_inside_concert(concert_point):
+#     for concert_normal in concert_face_normals.values():
+#         concert_vec_to_center = concert_point - concert_center
+#         if np.dot(concert_normal, concert_vec_to_center) < -concert_offset:
+#             return False
+#     return True
+
+# # Function to generate random points outside the offset distance from the faces
+# def generate_random_point_in_concert():
+#     while True:
+#         concert_x = random.uniform(concert_min_x, concert_max_x)
+#         concert_y = random.uniform(concert_min_y, concert_max_y)
+#         concert_z = random.uniform(concert_min_z, concert_max_z)
+#         concert_point = np.array([concert_x, concert_y, concert_z])
+
+#         for concert_face_vertices in concert_faces:
+#             concert_vertices_list = [concert_vertices[concert_vertex] for concert_vertex in concert_face_vertices]
+#             concert_face_center = np.mean(concert_vertices_list, axis=0)
+#             concert_face_normal = np.cross(concert_vertices_list[1] - concert_vertices_list[0], concert_vertices_list[2] - concert_vertices_list[1])
+#             concert_face_normal /= np.linalg.norm(concert_face_normal)
+#             concert_vec_to_face = concert_face_center - concert_point
+#             concert_distance_to_face = np.dot(concert_vec_to_face, concert_face_normal)
+
+#             if concert_distance_to_face < concert_offset:
+#                 break  # Point is inside the offset distance from this face
+#         else:
+#             print(concert_point)
+#             return concert_point  # Point is outside the offset distance from all faces
+        
+        
+###############################################################################################################################################
+
 
 def generate_measurements(receiver_position, room, num_senders):
     direct_signals = []
@@ -83,20 +226,25 @@ def generate_measurements(receiver_position, room, num_senders):
 
     # Senderpositions for the rooms
 
-    sender_positions = [ # THIS IS FOR TEST1ROOM
-        np.array(
-             [
-                 random.uniform(-2.1, 2.1),
-                 random.uniform(-0.9, 0.9),
-                 random.uniform(-1.6, 1.6),
-             ]
-        )
-        - receiver_position
-        for i in range(num_senders)
+    # sender_positions = [ # THIS IS FOR TEST1ROOM
+    #     np.array(
+    #          [
+    #              random.uniform(-2.1, 2.1),
+    #              random.uniform(-0.9, 0.9),
+    #              random.uniform(-1.6, 1.6),
+    #          ]
+    #     )
+    #     - receiver_position
+    #     for i in range(num_senders)
+    # ]
+
+    sender_positions = [ # THIS IS FOR PYRAMIDROOM
+        generate_random_point()
+        for j in range(num_senders)
     ]
 
-    # sender_positions = [ # THIS IS FOR PYRAMIDROOM
-    #     generate_random_point_in_boundary_trapezoid()
+    # sender_positions = [ # THIS IS FOR CONCERTHALL
+    #     generate_random_point_in_concert()
     #     for j in range(num_senders)
     # ]
 

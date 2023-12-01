@@ -13,5 +13,4 @@ TELEVISION = pywavefront.Wavefront(os.path.join(script_path, "models/television.
 WINDOW = pywavefront.Wavefront(os.path.join(script_path, "models/window.obj"), collect_faces=True)
 TEST1ROOM = pywavefront.Wavefront(os.path.join(script_path, "models/test1room.obj"), collect_faces=True)
 PYRAMIDROOM = pywavefront.Wavefront(os.path.join(script_path, "models/pyramidroom.obj"), collect_faces=True)
-ROOMCOMPLEX = pywavefront.Wavefront(os.path.join(script_path, "models/roomcomplex.obj"), collect_faces=True)
-ROOMCOMPLEX2 = pywavefront.Wavefront(os.path.join(script_path, "models/roomcomplex2.obj"), collect_faces=True)
+CONCERTHALL = pywavefront.Wavefront(os.path.join(script_path, "models/concerthall.obj"), collect_faces=True)
