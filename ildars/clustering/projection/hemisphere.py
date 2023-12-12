@@ -6,6 +6,7 @@ import numpy as np
 import scipy as sp
 import networkx as nx
 from skspatial.objects import Plane, Line, Circle
+from scipy.spatial.transform import Rotation
 
 # only for debugging
 import ildars_visualization.gnomonic_projection as viz
@@ -18,6 +19,7 @@ from ildars.clustering.projection import util
 # 12 hemispheres to always be true
 HEMI_WIDTH_DEGREE = 37.4
 COS_C_THRESHOLD = np.cos(np.radians(HEMI_WIDTH_DEGREE))
+phi = (1 + 5 ** 0.5) / 2  # Defines phi manually (approximately 1.618033988749895)
 
 # Strings used for dictionaries
 STR_START = "start"
@@ -170,19 +172,82 @@ class Hemisphere:
     # Get 12 hemispheres with random initial orientation
     @staticmethod
     def get_12_hemispheres():
-        vectors = [
-            np.array([1, 0, 0]),
-            np.array([0, 1, 0]),
-            np.array([0, 0, 1]),
-            np.array([1, 1, 1]),
-            np.array([1, 1, -1]),
-            np.array([1, -1, -1]),
+    #     dodecahedron_vertices = [
+    #     [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
+    #     [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1],
+    #     [0, 1/phi, phi], [0, 1/phi, -phi], [0, -1/phi, phi], [0, -1/phi, -phi],
+    #     [1/phi, phi, 0], [1/phi, -phi, 0], [-1/phi, phi, 0], [-1/phi, -phi, 0],
+    #     [phi, 0, 1/phi], [phi, 0, -1/phi], [-phi, 0, 1/phi], [-phi, 0, -1/phi]
+    # ]
+        dodecahedron_faces = [
+            [(1,1,1), (1,-1,1), (0,1/phi,phi), (0,-1/phi,phi), (phi,0,1/phi)],#oben rechts
+            [(-1,1,1), (-1,-1,1), (0,1/phi,phi), (0,-1/phi,phi), (-phi,0,1/phi)],#oben links
+            [(1,-1,1), (-1,-1,1), (0,-1/phi,phi), (1/phi,-phi,0), (-1/phi,-phi,0)],#nah oben
+            [(1,1,1), (-1,1,1), (0,1/phi,phi), (1/phi,phi,0), (-1/phi,phi,0)],#weit oben
+            [(-1,-1,1), (-1,-1,-1), (-1/phi,-phi,0), (-phi,0, 1/phi), (-phi,0,-1/phi)],#mitte links vorne
+            [(1,-1,1), (1,-1,-1), (1/phi,-phi,0), (phi,0,1/phi), (phi,0,-1/phi)],#mitte rechts vorne
+            [(-1,1,1), (-1,1,-1), (-1/phi,phi, 0), (-phi,0,1/phi), (-phi,0,-1/phi)],#mitte links hinten
+            [(1,1,1), (1,1,-1), (1/phi,phi,0), (phi,0,1/phi), (phi,0,-1/phi)],#mitte hinten rechts
+            [(1,-1,-1), (-1,-1,-1), (0,-1/phi,-phi), (1/phi,-phi,0), (-1/phi,-phi,0)],#nah unten
+            [(1,1,-1), (1,-1,-1), (0,1/phi,-phi), (0,-1/phi,-phi), (phi,0,-1/phi)],#unten rechts
+            [(-1,1,-1), (-1,-1,-1), (0,1/phi,-phi), (0,-1/phi,-phi), (-phi,0,-1/phi)],#unten links
+            [(1,1,-1), (-1,1,-1), (0,1/phi,-phi), (1/phi,phi,0), (-1/phi,phi,0)]#weit unten
         ]
-        # normalize all vectors
-        vectors = [math_util.normalize(vec) for vec in vectors]
-
-        # randomly rotate all vectors
-        rotation = sp.spatial.transform.Rotation.random()
-        rotated_vectors = rotation.apply(vectors)
-        all_vectors = np.append(rotated_vectors, -rotated_vectors, axis=0)
+        # Calculate center points of the faces
+        face_centers = []
+        for face_vertices in dodecahedron_faces:
+            # Convert vertices to NumPy array for easier calculations
+            vertices_array = np.array(face_vertices)
+            # Calculate the mean along each axis to get the center point
+            center_point = np.mean(vertices_array, axis=0)
+            face_centers.append(center_point)
+            # Normalize the vertices to be on the unit sphere    
+        all_vectors = [np.array(v) / np.linalg.norm(v) for v in face_centers]
         return [Hemisphere(vec) for vec in all_vectors]
+    
+    def get_6_hemispheres():
+        #cube_vertices = [
+        # [1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1], 
+        # [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]
+        # ]
+
+        cube_faces = [
+            [(1,1,1), (1,-1,1), (-1,1,1), (-1,-1,1)],#top
+            [(1,1,-1), (1,-1,-1), (-1,1,-1), (-1,-1,-1)],#bottom
+            [(1,1,-1), (1,-1,-1), (1,1,1), (1,-1,1)],#right
+            [(1,1,-1), (-1,1,-1), (1,1,1), (-1,1,1)],#back
+            [(-1,1,-1), (-1,-1,-1), (-1,1,1), (-1,-1,1)],#left
+            [(1,-1,-1), (-1,-1,-1), (1,-1,1), (-1,-1,1)]#front
+        ]
+        # Calculate center points of the faces
+        face_centers = []
+        for face_vertices in cube_faces:
+            # Convert vertices to NumPy array for easier calculations
+            vertices_array = np.array(face_vertices)
+            # Calculate the mean along each axis to get the center point
+            center_point = np.mean(vertices_array, axis=0)
+            face_centers.append(center_point)
+            # Normalize the vertices to be on the unit sphere    
+        all_vectors = [np.array(v) / np.linalg.norm(v) for v in face_centers]
+        return [Hemisphere(vec) for vec in all_vectors]
+
+    # Old Implementation of the 12 Hemispheres
+    # def get_12_hemispheres():
+    #     vectors = [
+    #         np.array([1, 0, 0]),
+    #         np.array([0, 1, 0]),
+    #         np.array([0, 0, 1]),
+    #         np.array([1, 1, 1]),
+    #         np.array([1, 1, -1]),
+    #         np.array([1, -1, -1]),
+    #     ]
+    #     # normalize all vectors
+    #     vectors = [math_util.normalize(vec) for vec in vectors]
+
+    #     # randomly rotate all vectors
+    #     rotation = sp.spatial.transform.Rotation.random()
+    #     rotated_vectors = rotation.apply(vectors)
+    #     all_vectors = np.append(rotated_vectors, -rotated_vectors, axis=0)
+    #     return [Hemisphere(vec) for vec in all_vectors]
+    
+    

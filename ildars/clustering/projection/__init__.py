@@ -18,7 +18,7 @@ def pairwise(iterable):
     return zip(a, b)
 
 def compute_reflection_clusters(reflected_signals):
-    hemispheres = Hemisphere.get_12_hemispheres()
+    hemispheres = Hemisphere.get_6_hemispheres() #Change to Hemisphere.get_12_hemispheres() if needed.
     compute_gnomonic_projection(reflected_signals, hemispheres)
     return find_clusters(hemispheres)
 

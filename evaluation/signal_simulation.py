@@ -20,7 +20,7 @@ offset = 0.1  # Change this value as needed
 #THIS IS FOR PYRAMIDROOM - PUT OTHER ROOMS IN COMMENTS WHEN RUNNING PYRAMIDROOM
 ###############################################################################################################################################
 
-# Define vertices (replace with your actual vertex coordinates)
+# Define vertices
 vertices = {
     'pA': np.array([1, 0.5, 0.5]),
     'pB': np.array([1, 0.5, -0.5]),
@@ -67,7 +67,7 @@ for face_vertices in faces:
     face_normals[tuple(face_vertices)] = normal / np.linalg.norm(normal)
 
 # Define offset (distance from faces)
-offset = 0.1  # Change this value as needed
+offset = 0.1
 
 # Check if a point is inside the shape considering the offset
 def is_point_inside(point):
@@ -103,7 +103,7 @@ def generate_random_point():
 #SAME BUT FOR THE CONCERTHALL - PUT OTHER ROOMS IN COMMENTS WHEN RUNNING CONCERTHALL
 ###############################################################################################################################################
 
-# # Define vertices (replace with your actual vertex coordinates)
+# # Define vertices
 # concert_vertices = {
 #     'cA': np.array([5.5, 0.8, 4.5]),
 #     'cB': np.array([5.5, 0.8, -4.5]),
@@ -179,7 +179,8 @@ def generate_random_point():
 #             print(concert_point)
 #             return concert_point  # Point is outside the offset distance from all faces
         
-        
+###############################################################################################################################################
+
 ###############################################################################################################################################
 
 
@@ -212,7 +213,7 @@ def generate_measurements(receiver_position, room, num_senders):
 
     # random sender positions
     # Following this are the old senderpositions for CUBE
-    # sender_positions = [
+    # sender_positions = [ # THIS IS FOR CUBE
     #     np.array(
     #         [
     #             random.uniform(-1, 1),
@@ -224,7 +225,7 @@ def generate_measurements(receiver_position, room, num_senders):
     #     for i in range(num_senders)
     # ]
 
-    # Senderpositions for the rooms
+    # Senderpositions for the new rooms
 
     # sender_positions = [ # THIS IS FOR TEST1ROOM
     #     np.array(
