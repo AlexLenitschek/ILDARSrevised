@@ -5,6 +5,7 @@ import itertools
 import numpy as np
 import scipy as sp
 import networkx as nx
+import math
 from skspatial.objects import Plane, Line, Circle
 from scipy.spatial.transform import Rotation
 
@@ -177,8 +178,8 @@ class Hemisphere:
     #     [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1],
     #     [0, 1/phi, phi], [0, 1/phi, -phi], [0, -1/phi, phi], [0, -1/phi, -phi],
     #     [1/phi, phi, 0], [1/phi, -phi, 0], [-1/phi, phi, 0], [-1/phi, -phi, 0],
-    #     [phi, 0, 1/phi], [phi, 0, -1/phi], [-phi, 0, 1/phi], [-phi, 0, -1/phi]
-    # ]
+    #     [phi, 0, 1/phi], [phi, 0, -1/phi], [-phi, 0, 1/phi], [-phi, 0, -1/phi]]
+    
         dodecahedron_faces = [
             [(1,1,1), (1,-1,1), (0,1/phi,phi), (0,-1/phi,phi), (phi,0,1/phi)],#oben rechts
             [(-1,1,1), (-1,-1,1), (0,1/phi,phi), (0,-1/phi,phi), (-phi,0,1/phi)],#oben links
@@ -208,8 +209,7 @@ class Hemisphere:
     def get_6_hemispheres():
         #cube_vertices = [
         # [1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1], 
-        # [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]
-        # ]
+        # [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]]
 
         cube_faces = [
             [(1,1,1), (1,-1,1), (-1,1,1), (-1,-1,1)],#top
@@ -230,7 +230,44 @@ class Hemisphere:
             # Normalize the vertices to be on the unit sphere    
         all_vectors = [np.array(v) / np.linalg.norm(v) for v in face_centers]
         return [Hemisphere(vec) for vec in all_vectors]
+    
+    def get_4_hemispheres():
+        #tetrahedron_vertices = [
+        # [1,0,-1/math.sqrt(2)], [-1,0,-1/math.sqrt(2), 
+        # [0,1,1/math.sqrt(2)], [0,-1,1/math.sqrt(2)]]
 
+        tetrahedron_faces = [
+            [(1,0,-1/math.sqrt(2)), (-1,0,-1/math.sqrt(2)), (0,1,1/math.sqrt(2))],
+            [(1,0,-1/math.sqrt(2)), (-1,0,-1/math.sqrt(2)), (0,-1,1/math.sqrt(2))],
+            [(1,0,-1/math.sqrt(2)), (0,1,1/math.sqrt(2)), (0,-1,1/math.sqrt(2))],
+            [(-1,0,-1/math.sqrt(2)), (0,1,1/math.sqrt(2)), (0,1,1/math.sqrt(2))],
+        ]
+        # Calculate center points of the faces
+        face_centers = []
+        for face_vertices in tetrahedron_faces:
+            # Convert vertices to NumPy array for easier calculations
+            vertices_array = np.array(face_vertices)
+            # Calculate the mean along each axis to get the center point
+            center_point = np.mean(vertices_array, axis=0)
+            face_centers.append(center_point)
+            # Normalize the vertices to be on the unit sphere    
+        all_vectors = [np.array(v) / np.linalg.norm(v) for v in face_centers]
+        return [Hemisphere(vec) for vec in all_vectors]
+    
+    def get_3_hemispheres():
+        vectors = [np.array([-1,0,0]), np.array([0.5,-math.sqrt(3)/2,0]), np.array([0.5,math.sqrt(3)/2,0])]
+
+        # Normalize the vertices to be on the unit sphere    
+        all_vectors = [np.array(v) / np.linalg.norm(v) for v in vectors]
+        return [Hemisphere(vec) for vec in all_vectors]
+
+    def get_2_hemispheres():
+        vectors = [np.array([0,0,1]), np.array([0,0,-1])]
+
+        # Normalize the vertices to be on the unit sphere    
+        all_vectors = [np.array(v) / np.linalg.norm(v) for v in vectors]
+        return [Hemisphere(vec) for vec in all_vectors]
+    
     # Old Implementation of the 12 Hemispheres
     # def get_12_hemispheres():
     #     vectors = [

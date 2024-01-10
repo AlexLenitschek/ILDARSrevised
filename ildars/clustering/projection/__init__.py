@@ -18,7 +18,7 @@ def pairwise(iterable):
     return zip(a, b)
 
 def compute_reflection_clusters(reflected_signals):
-    hemispheres = Hemisphere.get_6_hemispheres() #Change to Hemisphere.get_12_hemispheres() if needed.
+    hemispheres = Hemisphere.get_3_hemispheres() #Change to Hemisphere.get_x_hemispheres() where x is element of {4,6,12} if needed.
     compute_gnomonic_projection(reflected_signals, hemispheres)
     return find_clusters(hemispheres)
 
@@ -43,7 +43,7 @@ def find_clusters(hemispheres):
         ]
     g = intersection_graphs[0]
     # Visualization
-    # viz.plot_hemisphere_connectivity_graph(g)
+    #viz.plot_hemisphere_connectivity_graph(g)
 
     # Get connected components
     components = list(nx.connected_components(g))
