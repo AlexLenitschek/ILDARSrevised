@@ -17,6 +17,13 @@ class ReflectionCluster:
 
     def __hash__(self):
         return hash(self.id)
+    
+    def __str__(self):
+        return f"Reflection Cluster with {len(self.reflected_signals)} signals"
+
+    # def __str__(self):
+    #     lines_info = "\n".join([f"  {line}" for line in self.reflected_signals])
+    #     return f"Reflection Cluster {self.id} with {len(self.reflected_signals)} signals:\n{lines_info}"
 
     @staticmethod
     def _get_id():

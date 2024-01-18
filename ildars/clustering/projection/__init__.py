@@ -55,4 +55,8 @@ def find_clusters(hemispheres):
         )
         for component in components
     ]
+    print("\nDEBUG STATISTICS FOR GNOMONIC PROJECTION:")
+    print("Reflection Clusters:")
+    for cluster in clusters:
+        print(cluster)
     return clusters

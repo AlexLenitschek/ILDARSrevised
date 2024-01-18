@@ -77,6 +77,10 @@ def compute_reflection_clusters(reflected_signals):
         clusters.append(
             ReflectionCluster([line.reflected_signal for line in bin.lines])
         )
+    print("\nDEBUG STATISTICS FOR INVERSION: ")
+    print("Reflection Clusters:")
+    for cluster in clusters:
+        print(cluster)
     return clusters
 
 

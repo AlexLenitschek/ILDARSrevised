@@ -21,6 +21,7 @@ wall_error = 0.05 # 5% of reflection will wrongly be assigned
     [algorithms.clustering]
     inversion = true
     projection = true
+    dbscan = true
 
     [algorithms.wall_normal]
     all_pairs = true

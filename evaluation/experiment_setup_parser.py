@@ -12,6 +12,8 @@ def read_algorithm_selection_from_settings(settings):
         clustering.append(ClusteringAlgorithm.INVERSION)
     if settings["algorithms"]["clustering"]["projection"]:
         clustering.append(ClusteringAlgorithm.GNOMONIC_PROJECTION)
+    if settings["algorithms"]["clustering"]["dbscan"]:
+        clustering.append(ClusteringAlgorithm.DBSCAN)
     wall_normal = []
     if settings["algorithms"]["wall_normal"]["all_pairs"]:
         wall_normal.append(WallNormalAlgorithm.ALL_PAIRS)

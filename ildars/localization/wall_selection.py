@@ -34,6 +34,8 @@ def select_walls(reflection_clusters, wall_sel_algorithm):
 
 # select the cluster with the most reflections
 def select_by_largest_cluster(clusters):
+    # if len(clusters) <= 0: 
+    #     print(clusters)
     assert len(clusters) > 0
     return [max(clusters, key=len)]
 
@@ -41,6 +43,8 @@ def select_by_largest_cluster(clusters):
 # select the cluster where all reflection have the closest angular distance
 # to the respective wall normal vector
 def select_by_narrowest_cluster(clusters):
+    # if len(clusters) <= 0: 
+    #     print(clusters)
     return [min(clusters, key=get_cluster_distance_to_nv)]
 
 

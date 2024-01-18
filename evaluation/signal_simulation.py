@@ -96,7 +96,7 @@ def generate_random_point():
             if distance_to_face < offset:
                 break  # Point is inside the offset distance from this face
         else:
-            print(point)
+            #print(point)
             return point  # Point is outside the offset distance from all faces
         
 ###############################################################################################################################################
@@ -176,7 +176,7 @@ def generate_random_point():
 #             if concert_distance_to_face < concert_offset:
 #                 break  # Point is inside the offset distance from this face
 #         else:
-#             print(concert_point)
+#             #print(concert_point)
 #             return concert_point  # Point is outside the offset distance from all faces
         
 ###############################################################################################################################################

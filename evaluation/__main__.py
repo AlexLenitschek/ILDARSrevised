@@ -110,12 +110,12 @@ def run_experiment(iterations=1):
     positions = []
     while current_iteration <= iterations:
         for algo_conf in algo_configurations(algo_sel):
-            print("Selected configuration:")
-            print("  Clustering algorithm:", algo_conf[STR_CLUSTERING])
-            print("  Wall normal algorithm:", algo_conf[STR_WALL_NORMAL])
-            print("  Wall selection algorithm:", algo_conf[STR_WALL_SELECTION])
-            print("  Localization algorithm:", algo_conf[STR_LOCALIZATION])
-            print("  iteration:", current_iteration)
+            # print("Selected configuration:")
+            # print("  Clustering algorithm:", algo_conf[STR_CLUSTERING])
+            # print("  Wall normal algorithm:", algo_conf[STR_WALL_NORMAL])
+            # print("  Wall selection algorithm:", algo_conf[STR_WALL_SELECTION])
+            # print("  Localization algorithm:", algo_conf[STR_LOCALIZATION])
+            # print("  iteration:", current_iteration)
 
             positions = Runner.run_experiment(
                 testrooms.PYRAMIDROOM,
