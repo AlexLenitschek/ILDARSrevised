@@ -12,29 +12,33 @@ from ildars.clustering.cluster import ReflectionCluster
 EPSILON = 0.000000001
 
 # # HARDCODED THRESHOLDS 
-# Radius to check for neighbors
-EPS = 0.4
+# Radius to check for neighbors which will be potential core lines or border lines
+EPS = 0.55
+# Value used to reduce the EPS in the cluster creation which fights the single link effect
+EPS_MINUS = 0.10
 
 # MINLINES consists of the average neighbor count plus this integer. This ensures that we get Clusters with more elements 
 # and ignore small clusters which could be just some noises that coincidentally are next to each other.
 ADDITIONAL_NEIGHBORS = 3
-
 # the find_core_lines() function gets repeated with MINLINES -1 until atleast this amount of core_lines is found
-DESIRED_AMOUNT_OF_CORE_LINES = 5
+DESIRED_AMOUNT_OF_CORE_LINES = 20
+# Minimum amount of clusters. If there are less, then the clustering is repeated with MINLINES -1
+MINIMUM_AMOUNT_OF_CLUSTERS = 2
 
 #Average Number of neighbors for different EPS: (20 Senders & Pyramidroom)
 # Eps 0.1 = 1.00-1.05
 # Eps 0.2 = 1.10-1.30 
 # Eps 0.3 = 1.30-1.73
 # Eps 0.4 = 1.45-2.01
-# Don't pick EPS values below 0.5 as they are too small and sometimes will only return the empty list or yield the "SVD did not converge" error of numpy
+# Don't pick EPS values below 0.5 (too small, will not yield good results)
 # Eps 0.5 = 2.11-3.22
 # Eps 0.6 = 2.85-4.37
 # Eps 0.7 = 3.97-5.37
 # Eps 0.8 = 5.11-7.11
 # Eps 0.9 = 6.10-8.87
 # Eps 1.0 = 7.60-10.78
-# Not neccessary anymore as MINLINES is now dynamic. --> MINLINES = Average amount of neighbors per line rounded up plus ADDITIONAL_NEIGHBORS
+
+# MINLINES is now dynamic. --> MINLINES = Average amount of neighbors per line rounded up plus ADDITIONAL_NEIGHBORS
 
 ###########################################################################################################################################
 # Step by Step Implementation of DBSCAN
@@ -166,7 +170,7 @@ def form_clusters(core_lines, border_lines, MINLINES):
         if line not in visited:
             visited.add(line)
             cluster.append(line)
-            neighbors = [other_line for other_line in core_lines if compute_distance_between_lines(line, other_line) <= EPS]
+            neighbors = [other_line for other_line in core_lines if compute_distance_between_lines(line, other_line) <= EPS - EPS_MINUS]
             for neighbor_line in neighbors:
                 expand_cluster(cluster, neighbor_line)
 
@@ -183,7 +187,7 @@ def form_clusters(core_lines, border_lines, MINLINES):
     for line in border_lines:
         if not line_in_clusters(line):
             for cluster in clusters:
-                if any(compute_distance_between_lines(line, cluster_line) <= EPS for cluster_line in cluster):
+                if any(compute_distance_between_lines(line, cluster_line) <= EPS - EPS_MINUS for cluster_line in cluster):
                     cluster.append(line)
                     break
 
@@ -194,9 +198,9 @@ def form_clusters(core_lines, border_lines, MINLINES):
         if len(cluster) >= MINLINES
     ]
 
-    # Check if reflection_clusters is empty and MINLINES can be reduced
-    if not reflection_clusters and MINLINES > 1:
-        print(f"Reflection clusters are empty. Reducing MINLINES to {MINLINES - 1}")
+    # Check if there are enough reflection_cluster and MINLINES can be reduced
+    if len(reflection_clusters) < MINIMUM_AMOUNT_OF_CLUSTERS and MINLINES > 1:
+        print(f"Not enough Reflection clusters. Reducing MINLINES to {MINLINES - 1}")
         # Call the function again with MINLINES reduced by 1
         return form_clusters(core_lines, border_lines, MINLINES - 1)
     

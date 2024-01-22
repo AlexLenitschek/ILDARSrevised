@@ -211,8 +211,8 @@ def generate_measurements(receiver_position, room, num_senders):
         for tri in room_triangles
     ]
 
-    # random sender positions
-    # Following this are the old senderpositions for CUBE
+    # #random sender positions
+    # #Following this are the old senderpositions for CUBE
     # sender_positions = [ # THIS IS FOR CUBE
     #     np.array(
     #         [
