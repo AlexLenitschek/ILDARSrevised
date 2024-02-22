@@ -2,7 +2,7 @@
 
 [general]
 # Visualization will be generated iff. iterations are set to 1
-iterations = 1
+iterations = 500
 random_receiver = false
 num_senders = 20
     
@@ -11,10 +11,25 @@ num_senders = 20
     y = 0
     z = 0
 
+[simulation]
+# Pick which room should be used
+#room = "TEST1ROOM"
+#room = "PYRAMIDROOM"
+room = "CONCERTHALL"
+#room = "CUBE"
+#room = "BIG_CUBE"
+
+# Mark as True if the Senderboxes should use the dynamic generated boxes defined in signal_simulation.py 
+dynamic_senderbox = false
+# Mark as True if senderlocations calculated outside of the room to be removed from the .csv
+post_processing = true
+
+
 [error]
-von_mises_concentration = 132.312 # expected 5 deg angular std. deviation
-delta_error = 0.1 # 10cm standard deviation
-wall_error = 0.05 # 5% of reflection will wrongly be assigned
+# Simulated errors. To remove them, make them = 0
+von_mises_concentration = 132.312   # expected 5 deg angular std. deviation
+delta_error = 0.1                   # 10cm standard deviation
+wall_error = 0.05                   # 5% of reflection will wrongly be assigned
 
 [algorithms]
 

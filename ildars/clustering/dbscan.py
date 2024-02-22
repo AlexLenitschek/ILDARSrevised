@@ -4,41 +4,77 @@ sys.path.append ('../ILDARSrevised')
 import numpy as np
 import math
 from enum import Enum
+import toml
 
 import ildars.math_utils as util
 from ildars.clustering.cluster import ReflectionCluster
+from evaluation.signal_simulation import max_distance_center_to_outer_wall_center, amount_of_faces, amount_of_outer_wall_faces
+
+# Read experiment setup from settings.toml file
+settings_file = open("evaluation/settings.toml", "r")
+settings = toml.load(settings_file)
+# Read the selected room from the settings
+number_of_senders = settings["general"]["num_senders"]
+picked_room = settings["simulation"]["room"]
+# Check if senderbox generation is dynamic or hardcoded - WIP
+dynamic_senderbox = settings["simulation"]["dynamic_senderbox"]
 
 # Very small number
 EPSILON = 0.000000001
 
-# # HARDCODED THRESHOLDS 
-# Radius to check for neighbors which will be potential core lines or border lines
-EPS = 0.55
-# Value used to reduce the EPS in the cluster creation which fights the single link effect
-EPS_MINUS = 0.10
+
+###############################################################################################################################################
+# THIS IS FOR THE DYNAMIC ADJUSTMENT OF THE THRESHOLDS WITH THE USE OF ROOMINFORMATIONS LIKE SIZE - WORK IN PROGRESS
+###############################################################################################################################################
+if dynamic_senderbox == True:
+    # Define the minimum and maximum room sizes and their corresponding EPS and CLUSTER_EPS values
+    min_room_size = 0.85
+    max_room_size = 3.50
+    min_eps = 0.42
+    max_eps = 0.50
+    min_cluster_eps = 0.10
+    max_cluster_eps = 0.50
+
+    # Function to perform linear interpolation
+    def lerp(x, x0, x1, y0, y1):
+        return y0 + (x - x0) * (y1 - y0) / (x1 - x0)
+
+    # Function to get EPS and CLUSTER_EPS values based on room size
+    def get_values_for_room_size(room_size):
+        # Clamp room size to the minimum and maximum
+        room_size = min(max_room_size, max(min_room_size, room_size))
+        # Perform linear interpolation for EPS and CLUSTER_EPS values
+        EPS = lerp(room_size, min_room_size, max_room_size, max_eps, min_eps)
+        CLUSTER_EPS = lerp(room_size, min_room_size, max_room_size, max_cluster_eps, min_cluster_eps)
+        return EPS, CLUSTER_EPS
+
+    EPS, CLUSTER_EPS = get_values_for_room_size(max_distance_center_to_outer_wall_center)
+    print("EPS = ", EPS, "CLUSTER EPS = ", CLUSTER_EPS)
+
+###############################################################################################################################################
+else: # These are tested to bring the best accuracy for their respective room
+    if picked_room == "PYRAMIDROOM":
+        EPS = 0.50
+        CLUSTER_EPS = 0.50
+    elif picked_room == "CONCERTHALL":
+        EPS = 0.42
+        CLUSTER_EPS = 0.08
+    elif picked_room == "TEST1ROOM":
+        EPS = 0.42
+        CLUSTER_EPS = 0.15
+    else:
+        EPS = 0.42
+        CLUSTER_EPS = 0.15
 
 # MINLINES consists of the average neighbor count plus this integer. This ensures that we get Clusters with more elements 
 # and ignore small clusters which could be just some noises that coincidentally are next to each other.
-ADDITIONAL_NEIGHBORS = 3
+#ADDITIONAL_NEIGHBORS = -2
 # the find_core_lines() function gets repeated with MINLINES -1 until atleast this amount of core_lines is found
-DESIRED_AMOUNT_OF_CORE_LINES = 20
+DESIRED_AMOUNT_OF_CORE_LINES = math.floor(number_of_senders/2) #20 for 20 senders
 # Minimum amount of clusters. If there are less, then the clustering is repeated with MINLINES -1
 MINIMUM_AMOUNT_OF_CLUSTERS = 2
 
-#Average Number of neighbors for different EPS: (20 Senders & Pyramidroom)
-# Eps 0.1 = 1.00-1.05
-# Eps 0.2 = 1.10-1.30 
-# Eps 0.3 = 1.30-1.73
-# Eps 0.4 = 1.45-2.01
-# Don't pick EPS values below 0.5 (too small, will not yield good results)
-# Eps 0.5 = 2.11-3.22
-# Eps 0.6 = 2.85-4.37
-# Eps 0.7 = 3.97-5.37
-# Eps 0.8 = 5.11-7.11
-# Eps 0.9 = 6.10-8.87
-# Eps 1.0 = 7.60-10.78
-
-# MINLINES is now dynamic. --> MINLINES = Average amount of neighbors per line rounded up plus ADDITIONAL_NEIGHBORS
+# MINLINES = Average amount of neighbors per line divided by two and floored (minimum 2 minlines)
 
 ###########################################################################################################################################
 # Step by Step Implementation of DBSCAN
@@ -66,10 +102,10 @@ MINIMUM_AMOUNT_OF_CLUSTERS = 2
 def compute_reflection_clusters(reflected_signals):
     circular_segments = compute_cirular_segments_from_reflections(reflected_signals)
     line_segments = invert_circular_segments(circular_segments)
-    MINLINES = find_median_of_neighborcount(line_segments) # Used to get a dynamic value for MINLINES instead of an absolute
-    core_lines = find_core_lines(line_segments, MINLINES)
+    MINLINES, AVERAGE_NEIGHBORS_PER_LINE  = find_median_of_neighborcount(line_segments) # Used to get a dynamic value for MINLINES instead of an absolute
+    core_lines = find_core_lines(line_segments, MINLINES, AVERAGE_NEIGHBORS_PER_LINE)
     border_lines = find_border_lines(line_segments, core_lines)
-    clusters = form_clusters(core_lines, border_lines, MINLINES)
+    clusters = form_clusters(core_lines, border_lines, MINLINES, AVERAGE_NEIGHBORS_PER_LINE)
     return clusters
 
 # Step 1: Create line segment list with the inverted circular segments
@@ -112,16 +148,18 @@ def find_median_of_neighborcount(line_segments):
         total_neighbor_sum = total_neighbor_sum + neighbor_count
     
     # Calculate average number of neighbors per line
-    average_neighbors_per_line = total_neighbor_sum / len(line_segments)
+    AVERAGE_NEIGHBORS_PER_LINE = total_neighbor_sum / len(line_segments)
     # Dynamically set MINLINES based on the average number of neighbors plus some additional integer
-    MINLINES = math.ceil(average_neighbors_per_line) + ADDITIONAL_NEIGHBORS
+    #MINLINES = math.floor((math.ceil(AVERAGE_NEIGHBORS_PER_LINE) + ADDITIONAL_NEIGHBORS) / 2)
+    #MINLINES = math.floor(AVERAGE_NEIGHBORS_PER_LINE) + ADDITIONAL_NEIGHBORS
+    MINLINES = max(math.floor(AVERAGE_NEIGHBORS_PER_LINE / 2), 2)
     print("The MINLINE value (min. amount of neighbors for line to be core_line) is: ", MINLINES)
 
-    return MINLINES
+    return MINLINES, AVERAGE_NEIGHBORS_PER_LINE
 
 # Function that checks for all line segments if they have enough neighbors in their epsilon range EPS to be considered core_lines.
 # Adaptability: If not enough core_lines are found, then this function is repeated with MINLINES - 1
-def find_core_lines(line_segments, MINLINES):
+def find_core_lines(line_segments, MINLINES, AVERAGE_NEIGHBORS_PER_LINE):
     core_lines = []
     total_neighbor_sum = 0
     for line in line_segments:
@@ -137,8 +175,8 @@ def find_core_lines(line_segments, MINLINES):
     print("Average of neighbors per Line: ", total_neighbor_sum / len(line_segments))
     print("Amount of Core Lines: ", len(core_lines))
 
-    if len(core_lines) <= DESIRED_AMOUNT_OF_CORE_LINES and MINLINES > 1:
-        core_lines = find_core_lines(line_segments, MINLINES - 1)
+    if len(core_lines) <= DESIRED_AMOUNT_OF_CORE_LINES and MINLINES > math.ceil(AVERAGE_NEIGHBORS_PER_LINE):
+        core_lines = find_core_lines(line_segments, MINLINES - 1, AVERAGE_NEIGHBORS_PER_LINE)
 
     # Print core lines for debugging
     # print("Core Lines:")
@@ -161,7 +199,7 @@ def find_border_lines(line_segments, core_lines):
     return border_lines
 
 # Step 4: Cluster Formation
-def form_clusters(core_lines, border_lines, MINLINES):
+def form_clusters(core_lines, border_lines, MINLINES, AVERAGE_NEIGHBORS_PER_LINE):
     clusters = []
     visited = set()
 
@@ -170,7 +208,7 @@ def form_clusters(core_lines, border_lines, MINLINES):
         if line not in visited:
             visited.add(line)
             cluster.append(line)
-            neighbors = [other_line for other_line in core_lines if compute_distance_between_lines(line, other_line) <= EPS - EPS_MINUS]
+            neighbors = [other_line for other_line in core_lines if compute_distance_between_lines(line, other_line) <= CLUSTER_EPS]
             for neighbor_line in neighbors:
                 expand_cluster(cluster, neighbor_line)
 
@@ -187,7 +225,7 @@ def form_clusters(core_lines, border_lines, MINLINES):
     for line in border_lines:
         if not line_in_clusters(line):
             for cluster in clusters:
-                if any(compute_distance_between_lines(line, cluster_line) <= EPS - EPS_MINUS for cluster_line in cluster):
+                if any(compute_distance_between_lines(line, cluster_line) <= CLUSTER_EPS for cluster_line in cluster):
                     cluster.append(line)
                     break
 
@@ -199,10 +237,10 @@ def form_clusters(core_lines, border_lines, MINLINES):
     ]
 
     # Check if there are enough reflection_cluster and MINLINES can be reduced
-    if len(reflection_clusters) < MINIMUM_AMOUNT_OF_CLUSTERS and MINLINES > 1:
+    if len(reflection_clusters) < MINIMUM_AMOUNT_OF_CLUSTERS and MINLINES > math.ceil(AVERAGE_NEIGHBORS_PER_LINE):
         print(f"Not enough Reflection clusters. Reducing MINLINES to {MINLINES - 1}")
         # Call the function again with MINLINES reduced by 1
-        return form_clusters(core_lines, border_lines, MINLINES - 1)
+        return form_clusters(core_lines, border_lines, MINLINES - 1, AVERAGE_NEIGHBORS_PER_LINE)
     
     # Print reflection clusters for debugging
     print("These are the Lines used in the clustering")

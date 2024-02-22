@@ -3,21 +3,67 @@ import sys
 sys.path.append ('../ILDARSrevised')
 import numpy as np
 import math
+import toml
 from enum import Enum
+from evaluation.signal_simulation import max_distance_center_to_outer_wall_center, amount_of_faces, amount_of_outer_wall_faces
 
 import ildars.math_utils as util
 from ildars.clustering.cluster import ReflectionCluster
+# Read experiment setup from settings.toml file
+settings_file = open("evaluation/settings.toml", "r")
+settings = toml.load(settings_file)
+# Read the selected room from the settings
+picked_room = settings["simulation"]["room"]
+# Check if senderbox generation is dynamic or hardcoded - WIP
+dynamic_senderbox = settings["simulation"]["dynamic_senderbox"]
+# Very small number
+EPSILON = 0.000000001
+
+
+###############################################################################################################################################
+#THIS IS FOR THE DYNAMIC ADJUSTMENT OF THE THRESHOLDS WITH THE USE OF ROOMINFORMATIONS LIKE SIZE - WORK IN PROGRESS
+###############################################################################################################################################
+if dynamic_senderbox == True:
+    # Define the minimum and maximum room sizes and their corresponding EPS and CLUSTER_EPS values
+    min_room_size = 0.85
+    max_room_size = 3.011
+    min_LINE_TO_LINE_THRESHOLD = 0.02
+    max_LINE_TO_LINE_THRESHOLD = 0.30
+    min_LINE_TO_BIN_THRESHOLD = 0.08
+    max_LINE_TO_BIN_THRESHOLD = 0.65
+    # Function to perform linear interpolation
+    def lerp(x, x0, x1, y0, y1):
+        return y0 + (x - x0) * (y1 - y0) / (x1 - x0)
+
+    # Function to get EPS and CLUSTER_EPS values based on room size
+    def get_values_for_room_size(room_size):
+        # Clamp room size to the minimum and maximum
+        room_size = min(max_room_size, max(min_room_size, room_size))
+        # Perform linear interpolation for EPS and CLUSTER_EPS values
+        LINE_TO_LINE_THRESHOLD = lerp(room_size, min_room_size, max_room_size, max_LINE_TO_LINE_THRESHOLD, min_LINE_TO_LINE_THRESHOLD)
+        LINE_TO_BIN_THRESHOLD = lerp(room_size, min_room_size, max_room_size, max_LINE_TO_BIN_THRESHOLD, min_LINE_TO_BIN_THRESHOLD)
+        return LINE_TO_LINE_THRESHOLD, LINE_TO_BIN_THRESHOLD
+
+    LINE_TO_LINE_THRESHOLD, LINE_TO_BIN_THRESHOLD = get_values_for_room_size(max_distance_center_to_outer_wall_center)
+else:
+    if picked_room == "PYRAMIDROOM":
+        LINE_TO_LINE_THRESHOLD = 0.30
+        LINE_TO_BIN_THRESHOLD = 0.65
+    elif picked_room == "CONCERTHALL":
+        LINE_TO_LINE_THRESHOLD = 0.04
+        LINE_TO_BIN_THRESHOLD = 0.09
+    elif picked_room == "TEST1ROOM":
+        LINE_TO_LINE_THRESHOLD = 0.02
+        LINE_TO_BIN_THRESHOLD = 0.08
+    else:
+        LINE_TO_LINE_THRESHOLD = 0.03
+        LINE_TO_BIN_THRESHOLD = 0.09
 
 
 # Hard coded thresholds
-# Maximum (absolute) distance betweet two line in the same bin
-LINE_TO_LINE_THRESHOLD = 0.3
-# Maximum (absolution) distance from the bin's center to each of its lines
-LINE_TO_BIN_THRESHOLD = 0.65
 # Bins with less than median bin size * BIN_DISCARD_THRESHOLD lines are dropped
 BIN_DISCARD_RATIO = 0.5
-# Very small number
-EPSILON = 0.000000001
+
 
 
 def compute_reflection_clusters(reflected_signals):

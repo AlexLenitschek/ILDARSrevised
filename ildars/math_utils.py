@@ -2,11 +2,21 @@
 # are not included in any of the math packages (like numpy or scipy) we use
 
 import numpy as np
+import scipy as sp
+#from scipy.linalg import norm as scipy_norm
 
 
-# For a given vector, returns the parallel unit vector
+# # For a given vector, returns the parallel unit vector
+# def normalize(v: np.array) -> np.array:
+#     #return v / scipy_norm(v)
+#     return v / np.linalg.norm(v)
+
 def normalize(v: np.array) -> np.array:
-    return v / np.linalg.norm(v)
+    norm = np.linalg.norm(v)
+    if norm < 0.000001:
+        # Handle the case where the vector is a zero vector or very very small
+        return np.zeros_like(v)
+    return v / norm
 
 
 # Get the relative angular distance between two vetors.

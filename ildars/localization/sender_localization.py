@@ -2,14 +2,22 @@ import sys
 sys.path.append ('../ILDARSrevised')
 
 from enum import Enum
-
 import numpy as np
-
+import toml
 import ildars.math_utils as util
+from evaluation.signal_simulation import max_distance_center_to_outer_wall_center
 
 STR_COMPUTED = "computed"
 STR_DIRECT_SIGNAL = "direct_signal"
 STR_ORIGINAL = "original"
+
+settings_file = open("evaluation/settings.toml", "r")
+settings = toml.load(settings_file)
+# Set POST_PROCESSING to True if you want to enforce the max. distance limit.
+DATA_IMPROVEMENT = settings["simulation"]["post_processing"]
+# MAX_DISTANCE is used for post processing the computed positions. 
+# If the distance of a sender is computed to be way too far away, we remove it.
+MAX_DISTANCE = max_distance_center_to_outer_wall_center * 2
 
 LocalizationAlgorithm = Enum(
     "LocalizationAlgorithm",
@@ -37,28 +45,36 @@ def compute_sender_positions_for_given_wall(
         delta = ref_sig.delta
         if loc_algo is LocalizationAlgorithm.WALL_DIRECTION:
             distance = distance_wall_direction(u, v, w, delta)
+            #print("wall direction distance: ", distance)
         elif loc_algo is LocalizationAlgorithm.MAP_TO_NORMAL_VECTOR:
             distance = distance_map_to_normal(n, v, w, delta)
+            #print("map to normal distance: ", distance)
         elif loc_algo is LocalizationAlgorithm.REFLECTION_GEOMETRY:
             distance = distance_reflection_geometry(u, n, v, w)
+            #print("reflection geometry distance: ", distance)
         elif loc_algo is LocalizationAlgorithm.CLOSEST_LINES:
             distance = distance_closest_lines(n, w, v)
+            #print("closest lines distance: ", distance)
         else:
             raise NotImplementedError(
                 "Localization algorithm",
                 loc_algo,
                 "is either unknown or not implemented yet",
             )
-
-        positions.append(
-            {
-                STR_COMPUTED: np.multiply(
-                    ref_sig.direct_signal.direction, distance
-                ),
-                STR_DIRECT_SIGNAL: ref_sig.direct_signal,
-                STR_ORIGINAL: ref_sig.direct_signal.original_sender_position,
-            }
-        )
+        # computed_position = np.multiply(ref_sig.direct_signal.direction, distance)
+        # if np.linalg.norm(computed_position) > 1000:
+        #     print(distance)
+        #     print(f"Warning: Computed position is too large: {computed_position}")
+        if distance > 0:
+            positions.append(
+                {
+                    STR_COMPUTED: np.multiply(
+                        ref_sig.direct_signal.direction, distance
+                    ),
+                    STR_DIRECT_SIGNAL: ref_sig.direct_signal,
+                    STR_ORIGINAL: ref_sig.direct_signal.original_sender_position,
+                }
+            )
     return positions
 
 
@@ -70,6 +86,10 @@ def distance_wall_direction(u, v, w, delta):
     p = 0
     if minor != 0:
         p = np.divide(np.multiply(np.dot(w, b), np.abs(delta)), minor)
+        # Added for postprocessing, if the distance is too big, 
+        # we set the distance to 0 and don't include it into the results
+        if DATA_IMPROVEMENT == True:
+            if (np.abs(p) > MAX_DISTANCE): p = 0
     return p
 
 
@@ -82,6 +102,19 @@ def distance_map_to_normal(n, v, w, delta):
             np.subtract(np.multiply(2, n), np.multiply(np.abs(delta), w)), n
         )
         p = np.divide(upper, minor)
+        # Added for postprocessing, if the distance is too big, 
+        # we set the distance to 0 and don't include it into the results
+        
+        if DATA_IMPROVEMENT == True:
+            if (np.abs(p) > MAX_DISTANCE): 
+                # print("n: ", n)
+                # print("v: ", v)
+                # print("w: ", w)
+                # print("delta: ", delta)
+                # print("minor: ", minor)
+                # print("upper: ", upper)
+                # print("p: ", p)
+                p = 0
     else:
         print(
             "warning: encountered minor of 0 when using",
@@ -101,6 +134,10 @@ def distance_reflection_geometry(u, n, v, w):
     if minor != 0:
         upper = np.multiply(2, np.multiply(np.dot(n, n), np.dot(w, b)))
         p = np.divide(upper, minor)
+        # Added for postprocessing, if the distance is too big, 
+        # we set the distance to 0 and don't include it into the results
+        if DATA_IMPROVEMENT == True:
+            if (np.abs(p) > MAX_DISTANCE): p = 0
     else:
         print(
             "warning: encountered minor of 0 when using",
@@ -115,7 +152,13 @@ def distance_closest_lines(n: np.array, w: np.array, v: np.array) -> float:
     u = np.cross(v, w_inv)
     # we only return lambda which by construction denotes the distance of the
     # sender
-    return -(np.dot(np.cross(w_inv, a), u) / np.dot(np.cross(w_inv, v), u))
+    distance = -(np.dot(np.cross(w_inv, a), u) / np.dot(np.cross(w_inv, v), u))
+    # Added for postprocessing, if the distance is too big, 
+    # we set the distance to 0 and don't include it into the results
+    if DATA_IMPROVEMENT == True:
+        if np.abs(distance) > MAX_DISTANCE:
+            distance = 0
+    return distance
 
 
 # Since closest lines extended operates on multiple reflection clusters, we
@@ -141,13 +184,27 @@ def compute_sender_positions_closest_lines_extended(clusters):
             w_inv = rs.direction - 2 * np.dot(rs.direction, u) * u
             lines.append((2 * n, w_inv))
         center_point = compute_closest_point(lines)
-        solution.append(
-            {
-                STR_COMPUTED: center_point,
-                STR_DIRECT_SIGNAL: ds,
-                STR_ORIGINAL: ds.original_sender_position,
-            }
-        )
+        # Added for postprocessing, if the distance is too big, 
+        # we set the distance to 0 and don't include it into the results
+        distance = np.linalg.norm(center_point - ds.original_sender_position)
+        if DATA_IMPROVEMENT == True:
+            if np.abs(distance) <= MAX_DISTANCE:
+                #center_point = np.zeros_like(center_point)
+                solution.append(
+                    {
+                        STR_COMPUTED: center_point,
+                        STR_DIRECT_SIGNAL: ds,
+                        STR_ORIGINAL: ds.original_sender_position,
+                    }
+                )
+        else:
+            solution.append(
+                    {
+                        STR_COMPUTED: center_point,
+                        STR_DIRECT_SIGNAL: ds,
+                        STR_ORIGINAL: ds.original_sender_position,
+                    }
+                )
     return solution
 
 

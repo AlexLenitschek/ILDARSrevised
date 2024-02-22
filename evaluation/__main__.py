@@ -35,6 +35,17 @@ WALL_ERROR = settings["error"]["wall_error"]
 NUM_ITERATIONS = settings["general"]["iterations"]
 NUM_SENDERS = settings["general"]["num_senders"]
 
+# Picks which room should be used, change in the settings.toml and add new rooms here.
+selected_room = settings["simulation"]["room"]
+room_mapping = {
+    "TEST1ROOM": testrooms.TEST1ROOM,
+    "PYRAMIDROOM": testrooms.PYRAMIDROOM,
+    "CONCERTHALL": testrooms.CONCERTHALL,
+    "CUBE": testrooms.CUBE,
+    "BIG_CUBE": testrooms.BIG_CUBE,
+}
+room_instance = room_mapping[selected_room]
+
 receiver_position = np.array(
     [
         settings["general"]["receiver_position"]["x"],
@@ -94,7 +105,7 @@ def algo_configurations(algo_sel):
             i_clustering += 1
 
 
-def run_experiment(iterations=1):
+def run_experiment():
     # Get the current date and time
     current_datetime = datetime.datetime.now()
     # Format the date and time as a string (e.g., "2023-10-30_14-25-30")
@@ -106,7 +117,7 @@ def run_experiment(iterations=1):
     #)
 
     current_iteration = 1
-    iterations = 500
+    iterations = NUM_ITERATIONS
     positions = []
     while current_iteration <= iterations:
         for algo_conf in algo_configurations(algo_sel):
@@ -118,7 +129,7 @@ def run_experiment(iterations=1):
             # print("  iteration:", current_iteration)
 
             positions = Runner.run_experiment(
-                testrooms.PYRAMIDROOM,
+                room_instance, # Choosen in settings.toml
                 receiver_position,
                 NUM_SENDERS,
                 VON_MISES_CONCENTRATION,
@@ -143,4 +154,4 @@ def run_experiment(iterations=1):
     return positions
 
 
-run_experiment(NUM_ITERATIONS)
+run_experiment()
