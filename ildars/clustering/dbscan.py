@@ -21,12 +21,89 @@ dynamic_senderbox = settings["simulation"]["dynamic_senderbox"]
 
 # Very small number
 EPSILON = 0.000000001
+#max_distance_center_to_outer_wall_center = max_distance_center_to_outer_wall_center +2
+print("max_distance_center_to_outer_wall_center = ", max_distance_center_to_outer_wall_center)
+
+MAP_VARIATION = 2 # Right now I have 3 versions. 
+# 1 works by linearly scaling the thresholds between the ones of pyramidroom and concerthall
+# 2 uses piecewise linear interpolation
+# 3 uses linear interpolation
 
 
 ###############################################################################################################################################
 # THIS IS FOR THE DYNAMIC ADJUSTMENT OF THE THRESHOLDS WITH THE USE OF ROOMINFORMATIONS LIKE SIZE - WORK IN PROGRESS
 ###############################################################################################################################################
-if dynamic_senderbox == True:
+if dynamic_senderbox == True and MAP_VARIATION == 1:
+    def scale_thresholds_based_on_max_distance(max_distance_center_to_outer_wall_center):
+        # Using the pyramidroom and concerthall as reference rooms to scale the EPS and CLUSTER_EPS with
+        min_max_distance = 0.853  # Maximum wall distance for the smallest room (e.g., Pyramidroom)
+        max_max_distance = 6.1  # Maximum wall distance for the largest room (e.g., Concerthall)
+        min_thresholds = (0.50, 0.50)  # Thresholds for the smallest room
+        max_thresholds = (0.42, 0.08)  # Thresholds for the largest room
+
+        # Cap the max_distance_center_to_outer_wall_center value if it exceeds the maximum allowed
+        max_distance_center_to_outer_wall_center = min(max_distance_center_to_outer_wall_center, max_max_distance)
+
+        # Perform linear interpolation to scale thresholds based on the provided max_distance
+        scaling_factor = (max_distance_center_to_outer_wall_center - min_max_distance) / (max_max_distance - min_max_distance)
+        print("Scaling factor:", scaling_factor)  # Debug print
+
+        scaled_thresholds = tuple(
+            min_value + scaling_factor * (max_value - min_value)
+            for min_value, max_value in zip(min_thresholds, max_thresholds)
+        )
+
+        print("Scaled thresholds:", scaled_thresholds)  # Debug print
+        return scaled_thresholds
+
+    EPS, CLUSTER_EPS = scale_thresholds_based_on_max_distance(max_distance_center_to_outer_wall_center)
+    print("EPS = ", EPS, "CLUSTER EPS = ", CLUSTER_EPS)
+
+###############################################################################################################################################
+if dynamic_senderbox == True and MAP_VARIATION == 2:
+    def scale_thresholds_based_on_max_distance(max_distance_center_to_outer_wall_center):
+        # reference_rooms = {
+        #     "PYRAMIDROOM": (0.50, 0.50),
+        #     "CONCERTHALL": (0.42, 0.08),
+        #     "TEST1ROOM": (0.42, 0.15)
+        # }
+
+        # Piecewise linear interpolation function based on observed trends
+        def piecewise_linear_interpolation(x, x_values, y_values):
+            # Find the indices for interpolation
+            idx = 0
+            while x > x_values[idx+1]:
+                idx += 1
+                if idx == len(x_values)-1:
+                    break
+        
+            # Linear interpolation
+            x0, x1 = x_values[idx], x_values[idx+1]
+            y0, y1 = y_values[idx], y_values[idx+1]
+            return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+
+        # Ranges and corresponding threshold values
+        room_sizes = [0.85, 2.62, 6.1]  # Room size ranges for interpolation
+        eps_values = [0.50, 0.42, 0.42]  # Corresponding EPS values for each range
+        cluster_eps_values = [0.50, 0.15, 0.08]  # Corresponding CLUSTER_EPS values for each range
+
+        # Clamp max_distance_center_to_outer_wall_center to the minimum allowed value (Pyramidroom)
+        max_distance_center_to_outer_wall_center = max(max_distance_center_to_outer_wall_center, room_sizes[0])
+
+        # Clamp max_distance_center_to_outer_wall_center to the maximum allowed value (Concerthall)
+        max_distance_center_to_outer_wall_center = min(max_distance_center_to_outer_wall_center, room_sizes[-1])
+
+        # Use piecewise linear interpolation to determine thresholds based on max_distance
+        EPS = piecewise_linear_interpolation(max_distance_center_to_outer_wall_center, room_sizes, eps_values)
+        CLUSTER_EPS = piecewise_linear_interpolation(max_distance_center_to_outer_wall_center, room_sizes, cluster_eps_values)
+
+        return EPS, CLUSTER_EPS
+
+    EPS, CLUSTER_EPS = scale_thresholds_based_on_max_distance(max_distance_center_to_outer_wall_center)
+    print("EPS = ", EPS, "CLUSTER EPS = ", CLUSTER_EPS)
+
+###############################################################################################################################################
+if dynamic_senderbox == True and MAP_VARIATION == 3:
     # Define the minimum and maximum room sizes and their corresponding EPS and CLUSTER_EPS values
     min_room_size = 0.85
     max_room_size = 3.50
@@ -99,7 +176,7 @@ MINIMUM_AMOUNT_OF_CLUSTERS = 2
 ###########################################################################################################################################
 
 # Main Function that calls all the functions to create the clusters
-def compute_reflection_clusters(reflected_signals):
+def compute_reflection_clusters_DB(reflected_signals):
     circular_segments = compute_cirular_segments_from_reflections(reflected_signals)
     line_segments = invert_circular_segments(circular_segments)
     MINLINES, AVERAGE_NEIGHBORS_PER_LINE  = find_median_of_neighborcount(line_segments) # Used to get a dynamic value for MINLINES instead of an absolute

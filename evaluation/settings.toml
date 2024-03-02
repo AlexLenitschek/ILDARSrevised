@@ -14,8 +14,8 @@ num_senders = 20
 [simulation]
 # Pick which room should be used
 #room = "TEST1ROOM"
-#room = "PYRAMIDROOM"
-room = "CONCERTHALL"
+room = "PYRAMIDROOM"
+#room = "CONCERTHALL"
 #room = "CUBE"
 #room = "BIG_CUBE"
 
@@ -34,9 +34,9 @@ wall_error = 0.05                   # 5% of reflection will wrongly be assigned
 [algorithms]
 
     [algorithms.clustering]
-    inversion = true
+    inversion = false
     projection = true
-    dbscan = true
+    dbscan = false
 
     [algorithms.wall_normal]
     all_pairs = true

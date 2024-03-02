@@ -116,8 +116,8 @@ def run_experiment():
     #     datetime.datetime.now()#.replace(second=0, microsecond=0).isoformat()
     #)
 
-    current_iteration = 1
-    iterations = NUM_ITERATIONS
+    current_iteration = 1 
+    iterations = NUM_ITERATIONS # Defined in settings.toml
     positions = []
     while current_iteration <= iterations:
         for algo_conf in algo_configurations(algo_sel):

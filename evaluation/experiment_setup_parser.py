@@ -4,6 +4,10 @@ from ildars.clustering import ClusteringAlgorithm
 from ildars.localization.wall_selection import WallSelectionMethod
 from ildars.walls import WallNormalAlgorithm
 from ildars.localization.sender_localization import LocalizationAlgorithm
+import toml
+# Read experiment setup from settings.toml file
+settings_file = open("evaluation/settings.toml", "r")
+settings = toml.load(settings_file)
 
 
 def read_algorithm_selection_from_settings(settings):

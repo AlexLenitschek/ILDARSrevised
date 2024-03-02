@@ -18,12 +18,15 @@ picked_room = settings["simulation"]["room"]
 dynamic_senderbox = settings["simulation"]["dynamic_senderbox"]
 # Very small number
 EPSILON = 0.000000001
-
+MAP_VARIATION = 2
+# 1 uses linear interpolation
+# 2 uses piecewise linear interpolation
 
 ###############################################################################################################################################
 #THIS IS FOR THE DYNAMIC ADJUSTMENT OF THE THRESHOLDS WITH THE USE OF ROOMINFORMATIONS LIKE SIZE - WORK IN PROGRESS
 ###############################################################################################################################################
-if dynamic_senderbox == True:
+# VARIATION 1
+if dynamic_senderbox == True and MAP_VARIATION == 1:
     # Define the minimum and maximum room sizes and their corresponding EPS and CLUSTER_EPS values
     min_room_size = 0.85
     max_room_size = 3.011
@@ -45,6 +48,54 @@ if dynamic_senderbox == True:
         return LINE_TO_LINE_THRESHOLD, LINE_TO_BIN_THRESHOLD
 
     LINE_TO_LINE_THRESHOLD, LINE_TO_BIN_THRESHOLD = get_values_for_room_size(max_distance_center_to_outer_wall_center)
+
+###############################################################################################################################################
+#VARIATION 2
+if dynamic_senderbox == True and MAP_VARIATION == 2:
+    def scale_thresholds_based_on_max_distance(max_distance_center_to_outer_wall_center):
+        # reference_rooms = {
+        #     "PYRAMIDROOM": (0.50, 0.50),
+        #     "CONCERTHALL": (0.42, 0.08),
+        #     "TEST1ROOM": (0.42, 0.15)
+        # }
+
+        # Piecewise linear interpolation function based on observed trends
+        def piecewise_linear_interpolation(x, x_values, y_values):
+            # Find the indices for interpolation
+            idx = 0
+            while x > x_values[idx+1]:
+                idx += 1
+                if idx == len(x_values)-1:
+                    break
+        
+            # Linear interpolation
+            x0, x1 = x_values[idx], x_values[idx+1]
+            y0, y1 = y_values[idx], y_values[idx+1]
+            return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+
+        # Ranges and corresponding threshold values
+        room_sizes = [0.85, 2.62, 6.1]  # Room size ranges for interpolation
+        LINE_TO_LINE_THRESHOLD_values = [0.30, 0.02, 0.04]  # Corresponding LINE_TO_LINE_THRESHOLD values for each range
+        LINE_TO_BIN_THRESHOLD_values = [0.65, 0.08, 0.09]  # Corresponding LINE_TO_BIN_THRESHOLD values for each range
+
+        # Clamp max_distance_center_to_outer_wall_center to the minimum allowed value (Pyramidroom)
+        max_distance_center_to_outer_wall_center = max(max_distance_center_to_outer_wall_center, room_sizes[0])
+
+        # Clamp max_distance_center_to_outer_wall_center to the maximum allowed value (Concerthall)
+        max_distance_center_to_outer_wall_center = min(max_distance_center_to_outer_wall_center, room_sizes[-1])
+
+
+        # Use piecewise linear interpolation to determine thresholds based on max_distance
+        LINE_TO_LINE_THRESHOLD = piecewise_linear_interpolation(max_distance_center_to_outer_wall_center, room_sizes, LINE_TO_LINE_THRESHOLD_values)
+        LINE_TO_BIN_THRESHOLD = piecewise_linear_interpolation(max_distance_center_to_outer_wall_center, room_sizes, LINE_TO_BIN_THRESHOLD_values)
+
+        return LINE_TO_LINE_THRESHOLD, LINE_TO_BIN_THRESHOLD
+
+    LINE_TO_LINE_THRESHOLD, LINE_TO_BIN_THRESHOLD = scale_thresholds_based_on_max_distance(max_distance_center_to_outer_wall_center)
+    print("LINE_TO_LINE_THRESHOLD = ", LINE_TO_LINE_THRESHOLD, "LINE_TO_BIN_THRESHOLD = ", LINE_TO_BIN_THRESHOLD)
+
+###############################################################################################################################################
+
 else:
     if picked_room == "PYRAMIDROOM":
         LINE_TO_LINE_THRESHOLD = 0.30
@@ -66,7 +117,7 @@ BIN_DISCARD_RATIO = 0.5
 
 
 
-def compute_reflection_clusters(reflected_signals):
+def compute_reflection_clusters_INV(reflected_signals):
     # Compute circular segments and it's inversions from measurements
     circular_segments = compute_cirular_segments_from_reflections(
         reflected_signals
@@ -118,16 +169,16 @@ def compute_reflection_clusters(reflected_signals):
     max_bin_size = len(max([b.lines for b in bins], key=len))
     bins = [b for b in bins if len(b.lines) >= np.floor(0.25 * max_bin_size)]
     # Return found clusters.
-    clusters = []
+    clusters_inv = []
     for bin in bins:
-        clusters.append(
+        clusters_inv.append(
             ReflectionCluster([line.reflected_signal for line in bin.lines])
         )
     print("\nDEBUG STATISTICS FOR INVERSION: ")
     print("Reflection Clusters:")
-    for cluster in clusters:
+    for cluster in clusters_inv:
         print(cluster)
-    return clusters
+    return clusters_inv
 
 
 # Helper functions

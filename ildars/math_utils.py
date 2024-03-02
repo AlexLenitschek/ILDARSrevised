@@ -6,17 +6,16 @@ import scipy as sp
 #from scipy.linalg import norm as scipy_norm
 
 
-# # For a given vector, returns the parallel unit vector
-# def normalize(v: np.array) -> np.array:
-#     #return v / scipy_norm(v)
-#     return v / np.linalg.norm(v)
-
+# For a given vector, returns the parallel unit vector
 def normalize(v: np.array) -> np.array:
-    norm = np.linalg.norm(v)
-    if norm < 0.000001:
-        # Handle the case where the vector is a zero vector or very very small
-        return np.zeros_like(v)
-    return v / norm
+    return v / np.linalg.norm(v)
+
+# def normalize(v: np.array) -> np.array:
+#     norm = np.linalg.norm(v)
+#     if norm < 0.000001:
+#         # Handle the case where the vector is a zero vector or very very small
+#         return np.zeros_like(v)
+#     return v / norm
 
 
 # Get the relative angular distance between two vetors.

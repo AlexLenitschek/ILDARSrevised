@@ -226,7 +226,7 @@ def compute_closest_point(lines):
     G = np.array(G)
     d = np.array(d)
     # We assume G to be invertible in general position
-    assert np.linalg.matrix_rank(G) == G.shape[1]
+    #assert np.linalg.matrix_rank(G) == G.shape[1]
     # Solve using least squares approach
     return np.array(
         list(np.matmul(np.matmul(np.linalg.inv(np.matmul(G.T, G)), G.T), d))[

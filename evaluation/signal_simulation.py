@@ -49,6 +49,10 @@ mesh = trimesh.load_mesh(file_path)
 faces = mesh.faces
 amount_of_faces = len(faces)
 
+# Construct BVH for more efficient ray casting in is_point_in_line_of_sight()
+# = An oriented bounding box hierarchy (OBBH) is a data structure used for spatial partitioning of geometry. 
+room_mesh_bvh = mesh.bounding_box_oriented
+
 # Calculate the centers of all faces
 face_centers = mesh.vertices[faces].mean(axis=1)
 
@@ -101,8 +105,10 @@ def generate_random_point_dynamic(room_mesh, offset):
         point = np.array([x, y, z])
 
         # Check if the point is inside the room and offset from the walls
-        if is_point_inside(point, room_mesh, offset): #and is_point_in_line_of_sight(point, receiver_position, room_mesh):
+        #if is_point_inside(point, room_mesh, offset):
+        if is_point_in_line_of_sight(point, receiver_position, room_mesh, room_mesh_bvh) and is_point_inside(point, room_mesh, offset):
             return point
+
 
 
 
@@ -111,7 +117,6 @@ def is_point_inside(point, room_mesh, offset):
     # Check if point is inside the room
     if not room_mesh.contains([point]):
         return False
-
     # Check if the point is offset from all the walls
     for face_vertices in room_mesh.vertices[room_mesh.faces]:
         face_center = np.mean(face_vertices, axis=0)
@@ -121,27 +126,48 @@ def is_point_inside(point, room_mesh, offset):
             return False
     
     return True
-        
+
+
+def is_point_in_line_of_sight(point, receiver_position, room_mesh, room_mesh_bvh):
+    # Calculate the direction vector from the receiver position to the point
+    direction = point - receiver_position
+    #direction /= np.linalg.norm(direction)  # Normalize the direction vector
+
+    # Cast a ray from the receiver position to the point
+    result = room_mesh_bvh.ray.intersects_id([receiver_position], [direction])
+
+    if result:  # If any intersections found
+        intersection_face_id = result[0][0]  # Get the ID of the intersected face
+        # Check if the intersected face is between the point and the receiver position
+        face_center = room_mesh.vertices[room_mesh.faces[intersection_face_id]].mean(axis=0)
+        distance_to_point = np.linalg.norm(point - face_center)
+        distance_to_receiver = np.linalg.norm(receiver_position - face_center)
+        if distance_to_point < distance_to_receiver:
+            return False  # There is a face between the point and the receiver position
+    return True  # No face between the point and the receiver position
+
+
+
 # Function to check if there is a face between sender and receiver !!!VERY EXPENSIVE, TOO THE POINT OF ALMOST FREEZING THE CALCULATION!!! 
-def is_point_in_line_of_sight(sender_position, receiver_position, room_mesh):
-    # Vector from sender to receiver
-    line_direction = receiver_position - sender_position
+# def is_point_in_line_of_sight(sender_position, receiver_position, room_mesh):
+#     # Vector from sender to receiver
+#     line_direction = receiver_position - sender_position
 
-    # Iterate over each face of the room mesh
-    for face_vertices in room_mesh.vertices[room_mesh.faces]:
-        # Calculate face normal
-        face_normal = np.cross(face_vertices[1] - face_vertices[0], face_vertices[2] - face_vertices[0])
-        face_normal /= np.linalg.norm(face_normal)
+#     # Iterate over each face of the room mesh
+#     for face_vertices in room_mesh.vertices[room_mesh.faces]:
+#         # Calculate face normal
+#         face_normal = np.cross(face_vertices[1] - face_vertices[0], face_vertices[2] - face_vertices[0])
+#         face_normal /= np.linalg.norm(face_normal)
 
-        # Check if the face intersects with the line segment between sender and receiver
-        if np.dot(face_normal, line_direction) != 0:
-            t = np.dot(face_normal, (face_vertices[0] - sender_position)) / np.dot(face_normal, line_direction)
-            if 0 < t < 1:
-                intersection_point = sender_position + t * line_direction
-                if np.all(intersection_point >= np.minimum(sender_position, receiver_position)) and \
-                   np.all(intersection_point <= np.maximum(sender_position, receiver_position)):
-                    return False  # There is a face in between
-    return True  # No face in between, line of sight is clear
+#         # Check if the face intersects with the line segment between sender and receiver
+#         if np.dot(face_normal, line_direction) != 0:
+#             t = np.dot(face_normal, (face_vertices[0] - sender_position)) / np.dot(face_normal, line_direction)
+#             if 0 < t < 1:
+#                 intersection_point = sender_position + t * line_direction
+#                 if np.all(intersection_point >= np.minimum(sender_position, receiver_position)) and \
+#                    np.all(intersection_point <= np.maximum(sender_position, receiver_position)):
+#                     return False  # There is a face in between
+#     return True  # No face in between, line of sight is clear
 
 
 ###############################################################################################################################################
