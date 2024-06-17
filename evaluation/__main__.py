@@ -43,6 +43,7 @@ room_mapping = {
     "CONCERTHALL": testrooms.CONCERTHALL,
     "CUBE": testrooms.CUBE,
     "BIG_CUBE": testrooms.BIG_CUBE,
+    "TEST1ROOMNEW": testrooms.TEST1ROOMNEW
 }
 room_instance = room_mapping[selected_room]
 

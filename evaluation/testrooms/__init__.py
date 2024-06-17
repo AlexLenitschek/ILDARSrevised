@@ -14,3 +14,4 @@ WINDOW = pywavefront.Wavefront(os.path.join(script_path, "models/window.obj"), c
 TEST1ROOM = pywavefront.Wavefront(os.path.join(script_path, "models/test1room.obj"), collect_faces=True)
 PYRAMIDROOM = pywavefront.Wavefront(os.path.join(script_path, "models/pyramidroom.obj"), collect_faces=True)
 CONCERTHALL = pywavefront.Wavefront(os.path.join(script_path, "models/concerthall.obj"), collect_faces=True)
+TEST1ROOMNEW = pywavefront.Wavefront(os.path.join(script_path, "models/concerthall.obj"), collect_faces=True)

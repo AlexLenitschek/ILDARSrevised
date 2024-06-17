@@ -14,10 +14,11 @@ num_senders = 20
 [simulation]
 # Pick which room should be used
 #room = "TEST1ROOM"
-room = "PYRAMIDROOM"
+#room = "PYRAMIDROOM"
 #room = "CONCERTHALL"
 #room = "CUBE"
 #room = "BIG_CUBE"
+room = "TEST1ROOMNEW"
 
 # Mark as True if the Senderboxes should use the dynamic generated boxes defined in signal_simulation.py 
 dynamic_senderbox = false
