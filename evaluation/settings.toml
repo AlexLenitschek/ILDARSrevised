@@ -2,7 +2,7 @@
 
 [general]
 # Visualization will be generated iff. iterations are set to 1
-iterations = 500
+iterations = 1
 random_receiver = false
 num_senders = 20
     
@@ -35,9 +35,9 @@ wall_error = 0.05                   # 5% of reflection will be assigned wrongly
 [algorithms]
 
     [algorithms.clustering]
-    inversion = false
+    inversion = true
     projection = true
-    dbscan = false
+    dbscan = true
 
     [algorithms.wall_normal]
     all_pairs = true
