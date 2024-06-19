@@ -13,12 +13,12 @@ num_senders = 20
 
 [simulation]
 # Pick which room should be used
-#room = "TEST1ROOM"
+room = "TEST1ROOM"
 #room = "PYRAMIDROOM"
 #room = "CONCERTHALL"
 #room = "CUBE"
 #room = "BIG_CUBE"
-room = "TEST1ROOMNEW"
+#room = "TEST1ROOMNEW"
 
 # Mark as True if the Senderboxes should use the dynamic generated boxes defined in signal_simulation.py 
 dynamic_senderbox = false
@@ -30,7 +30,7 @@ post_processing = true
 # Simulated errors. To remove them, make them = 0
 von_mises_concentration = 132.312   # expected 5 deg angular std. deviation
 delta_error = 0.1                   # 10cm standard deviation
-wall_error = 0.05                   # 5% of reflection will wrongly be assigned
+wall_error = 0.05                   # 5% of reflection will be assigned wrongly
 
 [algorithms]
 
