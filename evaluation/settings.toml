@@ -28,9 +28,9 @@ post_processing = true
 
 [error]
 # Simulated errors. To remove them, make them = 0
-von_mises_concentration = 132.312   # expected 5 deg angular std. deviation
-delta_error = 0.1                   # 10cm standard deviation
-wall_error = 0.05                   # 5% of reflection will be assigned wrongly
+von_mises_concentration = 0 # 132.312   # expected 5 deg angular std. deviation
+delta_error = 0 # 0.1                   # 10cm standard deviation
+wall_error = 0 # 0.05                   # 5% of reflection will be assigned wrongly
 
 [algorithms]
 
