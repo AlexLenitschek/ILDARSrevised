@@ -2,7 +2,7 @@
 
 [general]
 # Visualization will be generated iff. iterations are set to 1
-iterations = 1
+iterations = 100
 random_receiver = false
 num_senders = 20
     

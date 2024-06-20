@@ -354,7 +354,7 @@ def invert_vector(vec):
     
 # Based on first answer from
     # https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
-@staticmethod
+#@staticmethod
 def get_closest_points_on_lines(line1, line2):
     pA = 0  # Closest point on line1 to line2
     pB = 0  # Closest point on line2 to line1
