@@ -18,7 +18,10 @@ from ildars.clustering.projection import util
 # Threshold for detecting, whether a given arc is on a given hemisphere
 # Threshold is directly taken from Rico Gießlers code, assuming the flag for
 # 12 hemispheres to always be true
-HEMI_WIDTH_DEGREE = 30 #24 #37.4 #30 #37.4
+#HEMI_WIDTH_DEGREE = 37.4 # 2 Hemisphere2
+#HEMI_WIDTH_DEGREE = 30 # 3 Hemispheres
+#HEMI_WIDTH_DEGREE = 27 # 6 Hemispheres
+HEMI_WIDTH_DEGREE = 24 # 12 Hemispheres
 COS_C_THRESHOLD = np.cos(np.radians(HEMI_WIDTH_DEGREE))
 phi = (1 + 5 ** 0.5) / 2  # Defines phi manually (approximately 1.618033988749895)
 
