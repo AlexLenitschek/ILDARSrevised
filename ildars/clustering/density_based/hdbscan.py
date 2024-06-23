@@ -69,9 +69,22 @@ def compute_core_distances(line_segments):
     # In HDBSCAN, this parameter is typically called min_samples. 
     # The core distance tells us how densely the point is surrounded by other points.
 
-    # This step is crucial because the core distances are used in the next step to compute the mutual reachability distances, 
+    # Core distances are used in the next step to compute the mutual reachability distances, 
     # which incorporate both the density around each point and the pairwise distances between points.
-    pass
+    core_distances = [] # List that will contain all the core distances
+    for i, line in enumerate(line_segments):
+        distances = [] # Initialize an empty list to store the distances between the current line segment and all other line segments.
+        for j, other_line in enumerate(line_segments):
+            if i != j: # Skip distance calculation for same line
+                dist = util.compute_distance_between_lines(line, other_line)
+                distances.append(dist)
+        distances.sort() # Sorts the distance in ascending order
+        if len(distances) >= min_samples:
+            core_distance = distances[min_samples - 1] # distance to k-th neighbor 
+        else:
+            core_distance = float('inf') # No k-th neighbor means distance to k-th neighbor is infinity
+        core_distances.append(core_distance)
+    return core_distances
 
 
 # Implementation to calculate mutual reachability distances
@@ -80,8 +93,8 @@ def compute_mutual_reachability_distances(line_segments, core_distances):
     # mutual reachability distance(p,q) = max(core_distance(p), core_distance(q), distance(p,q))
     # This distance measure incorporates the density information from the core distances and ensures that points within dense regions have smaller mutual reachability distances.
 
-    # The mutual reachability distance is a key concept in HDBSCAN because it combines local density information with pairwise distances to form a more robust distance measure. 
-    # This measure is then used to construct the MST in the next step, leading to the hierarchical clustering structure that HDBSCAN leverages.
+    # The mutual reachability distance combines local density information with pairwise distances to form a more robust distance measure. 
+    # Used to construct the MST in the next step.
     pass
 
 
@@ -90,7 +103,7 @@ def construct_mst(mutual_reachability_distances):
     # A minimum spanning tree of a weighted graph is a subset of the edges that connects all vertices together, 
     # without any cycles, and with the minimum possible total edge weight.
 
-    # Constructing the MST is a crucial step because it creates the hierarchical structure required for the next steps in HDBSCAN. 
+    # The MST is needed to create the hierarchical structure required for the next steps in HDBSCAN. 
     # The MST represents the connectivity of points based on their mutual reachability distances, 
     # which directly influences the formation of clusters in the hierarchical clustering process.
     pass
