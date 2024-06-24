@@ -14,7 +14,7 @@ import ildars.clustering.density_based.util as util
 min_samples = 5
 
 # Main Function that calls all the functions to create the clusters
-def compute_reflection_clusters_DB(reflected_signals):
+def compute_reflection_clusters_HDB(reflected_signals):
     # Step 1: Compute the circular segments using the reflected signals (same as in DBSCAN)
     circular_segments = compute_cirular_segments_from_reflections(reflected_signals)
     # Step 2: Compute the line segments using the circular segments. This makes clustering way easier. (same as in DBSCAN)
@@ -45,8 +45,8 @@ def compute_cirular_segments_from_reflections(reflected_signals):
         p0 = np.divide(np.multiply(vw, delta), np.linalg.norm(vw) ** 2)
         p1 = np.multiply(w, delta / 2)
         segments.append(util.Segment(p0, p1, reflection))
-    print("\nDEBUG STATISTICS FOR DBSCAN: ")
-    #print("Amount of Circular Segments: ", len(segments))
+    print("\nDEBUG STATISTICS FOR HDBSCAN: ")
+    #print("HDBSCAN - Amount of Circular Segments: ", len(segments))
     return segments
 
 
