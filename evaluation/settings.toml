@@ -37,7 +37,7 @@ wall_error = 0 # 0.05                   # 5% of reflection will be assigned wron
     [algorithms.clustering]
     inversion = true
     projection = true
-    dbscan = false
+    dbscan = true
 
     [algorithms.wall_normal]
     all_pairs = true

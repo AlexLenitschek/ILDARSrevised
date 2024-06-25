@@ -6,7 +6,7 @@ import math
 from enum import Enum
 import toml
 
-import ildars.math_utils as util
+import ildars.clustering.density_based.util as util
 from ildars.clustering.cluster import ReflectionCluster
 from evaluation.signal_simulation import max_distance_center_to_outer_wall_center, amount_of_faces, amount_of_outer_wall_faces
 
@@ -176,7 +176,7 @@ MINIMUM_AMOUNT_OF_CLUSTERS = 2
 ###########################################################################################################################################
 
 # Main Function that calls all the functions to create the clusters
-def compute_reflection_clusters_DB(reflected_signals):
+def compute_reflection_clusters_in_DB(reflected_signals):
     circular_segments = compute_cirular_segments_from_reflections(reflected_signals)
     line_segments = invert_circular_segments(circular_segments)
     MINLINES, AVERAGE_NEIGHBORS_PER_LINE  = find_median_of_neighborcount(line_segments) # Used to get a dynamic value for MINLINES instead of an absolute

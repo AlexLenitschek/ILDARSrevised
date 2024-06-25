@@ -30,3 +30,7 @@ class ReflectedSignal:
 
     def __hash__(self):
         return hash(self.index)
+    
+    @classmethod
+    def clear_signals(cls):
+        cls.Signals.clear()

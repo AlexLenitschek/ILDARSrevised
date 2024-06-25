@@ -12,7 +12,7 @@ from scipy.spatial.transform import Rotation
 # only for debugging
 import ildars_visualization.gnomonic_projection as viz
 
-import ildars.math_utils as math_util
+import ildars.clustering.projection.util as math_util
 from ildars.clustering.projection import util
 
 # Threshold for detecting, whether a given arc is on a given hemisphere
