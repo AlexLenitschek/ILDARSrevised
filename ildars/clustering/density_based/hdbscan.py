@@ -2,6 +2,9 @@
 import sys
 sys.path.append ('../ILDARSrevised')
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import ildars.clustering.density_based.util as util
 
 #import math
@@ -12,6 +15,55 @@ import ildars.clustering.density_based.util as util
 # Threshold needed for the core distance of the line_segments. 
 # core_distance for a line_segment = euclidian distance to 5th closest neighbor.
 min_samples = 5
+
+def test_HDB(reflected_signals):
+    # Step 1: Compute the circular segments using the reflected signals (same as in DBSCAN)
+    circular_segments = compute_cirular_segments_from_reflections(reflected_signals)
+    print("Circular Segments: \n")
+    numerical_values = []
+    for circ_segment in circular_segments:
+        print(circ_segment)
+        p1 = circ_segment.p1
+        p2 = circ_segment.p2
+        numerical_values.append((p1, p2))
+    util.visualize_circular_segments(numerical_values)
+    print("############################################################################## \n")
+
+
+    # Step 2: Compute the line segments using the circular segments. This makes clustering way easier. (same as in DBSCAN)
+    line_segments = invert_circular_segments(circular_segments)
+    print("Line Segments: \n")
+    for line in line_segments:
+        print(line)
+        line_numerical_values = [(line.p1, line.p2, line.direction) for line in line_segments]
+    # Visualize line segments
+    util.visualize_line_segments(line_numerical_values)
+    print("############################################################################## \n")
+
+
+    # Step 3: Compute the core distances for each line segment
+    core_distances = compute_core_distances(line_segments)
+    print("Core Distances: \n")
+    print(core_distances)
+    # Plotting a histogram
+    plt.figure(figsize=(10, 6))
+    plt.hist(core_distances, bins=20, edgecolor='black')
+    plt.title('Histogram of Core Distances')
+    plt.xlabel('Core Distance')
+    plt.ylabel('Frequency')
+    plt.grid(True)
+    plt.show()
+
+    # Plotting a line plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(core_distances, marker='o')
+    plt.title('Line Plot of Core Distances')
+    plt.xlabel('Index')
+    plt.ylabel('Core Distance')
+    plt.grid(True)
+    plt.show()
+    print("##############################################################################")
+    pass
 
 # Main Function that calls all the functions to create the clusters
 def compute_reflection_clusters_HDB(reflected_signals):

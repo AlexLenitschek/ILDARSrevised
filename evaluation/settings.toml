@@ -2,7 +2,7 @@
 
 [general]
 # Visualization will be generated iff. iterations are set to 1
-iterations = 1
+iterations = 100
 random_receiver = false
 num_senders = 20
     
@@ -13,8 +13,8 @@ num_senders = 20
 
 [simulation]
 # Pick which room should be used
-room = "TEST1ROOM"
-#room = "PYRAMIDROOM"
+#room = "TEST1ROOM"
+room = "PYRAMIDROOM"
 #room = "CONCERTHALL"
 #room = "CUBE"
 #room = "BIG_CUBE"
@@ -35,9 +35,10 @@ wall_error = 0 # 0.05                   # 5% of reflection will be assigned wron
 [algorithms]
 
     [algorithms.clustering]
-    inversion = true
+    inversion = false
     projection = true
-    dbscan = true
+    dbscan = false
+    hdbscan = false
 
     [algorithms.wall_normal]
     all_pairs = true

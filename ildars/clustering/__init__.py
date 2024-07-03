@@ -7,26 +7,23 @@ from ildars.clustering import projection
 from ildars.clustering import density_based
 
 ClusteringAlgorithm = Enum(
-    "ClusteringAlgorithm", ["INVERSION", "GNOMONIC_PROJECTION", "DBSCAN"]
+    "ClusteringAlgorithm", ["INVERSION", "GNOMONIC_PROJECTION", "DBSCAN", "HDBSCAN"]
 )
 
 
 def compute_reflection_clusters(clustering_algorithm, reflected_signals):
     clusters = None
-    # GP performs different when other clustering algorithms are used aswell. This is just an experiment to see if reflected_signals is changed and reused in any way
-    # Deep copies to ensure each algorithm operates on its own independent data
-    reflected_signalsGP = copy.deepcopy(reflected_signals)
-    reflected_signalsINV = copy.deepcopy(reflected_signals)
-    reflected_signalsDB = copy.deepcopy(reflected_signals)
-    # reflected_signalsHDB = copy.deepcopy(reflected_signals)
+    # This is used to Test and Visualize some of the Functions in the HDBSCAN Clustering algorithm
+    # density_based.test_HDB(reflected_signals)
+
     if clustering_algorithm is ClusteringAlgorithm.GNOMONIC_PROJECTION:
-        clusters = projection.compute_reflection_clusters_GP(reflected_signalsGP)
+        clusters = projection.compute_reflection_clusters_GP(reflected_signals)
     elif clustering_algorithm is ClusteringAlgorithm.INVERSION:
-        clusters = inversion.compute_reflection_clusters_INV(reflected_signalsINV)
+        clusters = inversion.compute_reflection_clusters_INV(reflected_signals)
     elif clustering_algorithm is ClusteringAlgorithm.DBSCAN:
-        clusters = density_based.compute_reflection_clusters_DB(reflected_signalsDB)
-    #elif clustering_algorithm is ClusteringAlgorithm.HDBSCAN:
-        #clusters = dbscan.compute_reflection_clusters_HDB(reflected_signalsHDB)
+        clusters = density_based.compute_reflection_clusters_DB(reflected_signals)
+    elif clustering_algorithm is ClusteringAlgorithm.HDBSCAN:
+        clusters = density_based.compute_reflection_clusters_HDB(reflected_signals)
 
     else:
         raise NotImplementedError(

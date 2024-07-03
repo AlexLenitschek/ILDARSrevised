@@ -3,6 +3,7 @@ sys.path.append ('../ILDARSrevised')
 from ildars import clustering
 from ildars import walls
 from ildars import localization
+import copy
 
 from evaluation.signal_simulation import generate_measurements
 from evaluation.error_simulation import simulate_error
@@ -79,15 +80,28 @@ class Runner:
             Runner._actual_wall_normals[iteration] = wall_nv
         return Runner._simulated_signals[iteration]
 
+    # Old version without deep copy had the problem that reusing of reflected_signals in the different clustering algorithms
+    # led to a change of the offset results which is of course not wanted.
+    # @staticmethod
+    # def _get_clusters(algo, iteration, signals):
+    #     if iteration not in Runner._clusters:
+    #         del Runner._clusters  # Free previous iterations from memory
+    #         Runner._clusters = {iteration: {}}
+    #     if algo not in Runner._clusters[iteration]:
+    #         Runner._clusters[iteration] = {
+    #             algo: clustering.compute_reflection_clusters(algo, signals)
+    #         }
+    #     return Runner._clusters[iteration][algo]
+    
     @staticmethod
     def _get_clusters(algo, iteration, signals):
         if iteration not in Runner._clusters:
             del Runner._clusters  # Free previous iterations from memory
             Runner._clusters = {iteration: {}}
         if algo not in Runner._clusters[iteration]:
-            Runner._clusters[iteration] = {
-                algo: clustering.compute_reflection_clusters(algo, signals)
-            }
+            # Deep copy signals to ensure independence
+            signals_copy = copy.deepcopy(signals)
+            Runner._clusters[iteration][algo] = clustering.compute_reflection_clusters(algo, signals_copy)
         return Runner._clusters[iteration][algo]
 
     @staticmethod

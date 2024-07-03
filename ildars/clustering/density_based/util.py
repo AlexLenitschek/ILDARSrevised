@@ -2,6 +2,9 @@ import sys
 sys.path.append ('../ILDARSrevised')
 import numpy as np
 import math
+import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from enum import Enum
 import toml
 import ildars.math_utils as util
@@ -177,3 +180,70 @@ def get_angle(v1: np.array, v2: np.array) -> float:
     u1 = normalize(v1)
     u2 = normalize(v2)
     return np.arccos(np.clip(np.dot(u1, u2), -1.0, 1.0))
+
+# Function to parse each segment string into a tuple of points
+def parse_segment(segment):
+    import re
+    points = re.findall(r'\[([-\d. ]+)\]', segment)
+    p1 = list(map(float, points[0].split()))
+    p2 = list(map(float, points[1].split()))
+    return p1, p2
+
+def visualize_circular_segments(numerical_values):
+    x_vals = []
+    y_vals = []
+    z_vals = []
+
+    for p1, p2 in numerical_values:
+        x_vals.extend([p1[0], p2[0]])
+        y_vals.extend([p1[1], p2[1]])
+        z_vals.extend([p1[2], p2[2]])
+
+    x_vals = np.array(x_vals)
+    y_vals = np.array(y_vals)
+    z_vals = np.array(z_vals)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot each segment
+    for p1, p2 in numerical_values:
+        ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], marker='o')
+
+    # Set labels and title
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title('Visual Representation of Segments')
+
+    plt.show()
+
+    
+def visualize_line_segments(numerical_values):
+    x_vals = []
+    y_vals = []
+    z_vals = []
+
+    for p1, p2, direction in numerical_values:
+        x_vals.extend([p1[0], p2[0]])
+        y_vals.extend([p1[1], p2[1]])
+        z_vals.extend([p1[2], p2[2]])
+
+    x_vals = np.array(x_vals)
+    y_vals = np.array(y_vals)
+    z_vals = np.array(z_vals)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot each line segment
+    for p1, p2, direction in numerical_values:
+        ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], marker='o')
+
+    # Set labels and title
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title('Visual Representation of Line Segments')
+
+    plt.show()

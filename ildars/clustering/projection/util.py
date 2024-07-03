@@ -54,3 +54,7 @@ def intersect_2d(l1p1, l1p2, l2p1, l2p2):
     except ValueError:
         return False
     return True
+
+# For a given vector, returns the parallel unit vector
+def normalize(v: np.array) -> np.array:
+    return v / np.linalg.norm(v)

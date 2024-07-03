@@ -4,11 +4,20 @@ sys.path.append ('../ILDARSrevised')
 
 from ildars.reflected_signal import ReflectedSignal
 import ildars.clustering.density_based.dbscan as dbscan
-#import ildars.clustering.density_based.hdbscan as hdbscan
+import ildars.clustering.density_based.hdbscan as hdbscan
 
 def compute_reflection_clusters_DB(reflected_signals):
     clusters = dbscan.compute_reflection_clusters_in_DB(reflected_signals)
     ReflectedSignal.clear_signals
+    return clusters
+
+def compute_reflection_clusters_HDB(reflected_signals):
+    clusters = hdbscan.compute_reflection_clusters_HDB(reflected_signals)
+    return clusters
+
+# Executes the same functions as the one above with additional print statements for debugging
+def test_HDB(reflected_signals):
+    clusters = hdbscan.test_HDB(reflected_signals)
     return clusters
 
 # def compute_reflection_clusters_HDB(reflected_signals):
