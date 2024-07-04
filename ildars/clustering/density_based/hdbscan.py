@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import ildars.clustering.density_based.util as util
 import toml
+import plotly.graph_objects as go
+
+import tkinter as tk
+from tkinter import ttk
 
 # Read experiment setup from settings.toml file
 settings_file = open("evaluation/settings.toml", "r")
@@ -76,8 +80,12 @@ def compute_reflection_clusters_HDB(reflected_signals):
         plt.ylabel('Core Distance')
         plt.grid(True)
         plt.show()
-        print("##############################################################################")
-    
+        print("############################################################################## \n")
+
+        # Printing the Mutual Reachability Distance Matrix
+        print("mutual_reachability_distances: \n")
+        print(mutual_reachability_distances)
+
     return clusters
 
 
@@ -97,7 +105,7 @@ def compute_cirular_segments_from_reflections(reflected_signals):
     #print("HDBSCAN - Amount of Circular Segments: ", len(segments))
     return segments
 
-
+# Step 2: Compute the line segments using the circular segments. This makes clustering way easier. (same as in DBSCAN)
 # Function that turns circular segments into line segments through inversion
 def invert_circular_segments(circular_segments):
     inverted_line_segments = []
@@ -110,15 +118,15 @@ def invert_circular_segments(circular_segments):
         inverted_line_segments.append(inverted_segment)
     return inverted_line_segments
 
-
+# Step 3: Compute the core distances for each line segment
 # Implementation to compute core distances for each line segment
 def compute_core_distances(line_segments): 
     # The core distance of a point p is the distance to its k-th nearest neighbor, where k is a user-defined parameter. 
     # In HDBSCAN, this parameter is typically called min_samples. 
     # The core distance tells us how densely the point is surrounded by other points.
-
     # Core distances are used in the next step to compute the mutual reachability distances, 
     # which incorporate both the density around each point and the pairwise distances between points.
+
     core_distances = [] # List that will contain all the core distances
     for i, line in enumerate(line_segments):
         distances = [] # Initialize an empty list to store the distances between the current line segment and all other line segments.
@@ -134,16 +142,26 @@ def compute_core_distances(line_segments):
         core_distances.append(core_distance)
     return core_distances
 
-
+# Step 4: Calculate the mutual reachability distances
 # Implementation to calculate mutual reachability distances
-def compute_mutual_reachability_distances(line_segments, core_distances): 
+def compute_mutual_reachability_distances(line_segments, core_distances):
     # The mutual reachability distance between two points p and q is defined as: 
     # mutual reachability distance(p,q) = max(core_distance(p), core_distance(q), distance(p,q))
     # This distance measure incorporates the density information from the core distances and ensures that points within dense regions have smaller mutual reachability distances.
-
     # The mutual reachability distance combines local density information with pairwise distances to form a more robust distance measure. 
     # Used to construct the MST in the next step.
-    pass
+
+    num_segments = len(line_segments) # Initialize how big the matrix will be
+    mutual_reachability_distances = np.zeros((num_segments, num_segments)) # Initialize an empty matrix to store the mutual reachability distances
+    # Iterate over each pair of line segments:
+    for i in range(num_segments):
+        for j in range(i + 1, num_segments):
+            distance = util.compute_distance_between_lines(line_segments[i], line_segments[j]) # Compute the distance between line segments i and j using distance function from util
+            mrd = max(core_distances[i], core_distances[j], distance) # Compute the mutual reachability distance  
+            mutual_reachability_distances[i][j] = mrd  # Store the mutual reachability distance in the matrix
+            mutual_reachability_distances[j][i] = mrd  # The matrix is symmetric
+    
+    return mutual_reachability_distances
 
 
 # Implementation to construct the MST from mutual reachability distances

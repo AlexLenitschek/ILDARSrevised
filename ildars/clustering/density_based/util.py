@@ -9,6 +9,7 @@ from enum import Enum
 import toml
 import ildars.math_utils as util
 from ildars.clustering.cluster import ReflectionCluster
+import re # Regular Expressions
 # Very small number
 EPSILON = 0.000000001
 
@@ -183,7 +184,6 @@ def get_angle(v1: np.array, v2: np.array) -> float:
 
 # Function to parse each segment string into a tuple of points
 def parse_segment(segment):
-    import re
     points = re.findall(r'\[([-\d. ]+)\]', segment)
     p1 = list(map(float, points[0].split()))
     p2 = list(map(float, points[1].split()))
@@ -193,23 +193,18 @@ def visualize_circular_segments(numerical_values):
     x_vals = []
     y_vals = []
     z_vals = []
-
     for p1, p2 in numerical_values:
         x_vals.extend([p1[0], p2[0]])
         y_vals.extend([p1[1], p2[1]])
         z_vals.extend([p1[2], p2[2]])
-
     x_vals = np.array(x_vals)
     y_vals = np.array(y_vals)
     z_vals = np.array(z_vals)
-
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-
     # Plot each segment
     for p1, p2 in numerical_values:
         ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], marker='o')
-
     # Set labels and title
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
@@ -223,23 +218,18 @@ def visualize_line_segments(numerical_values):
     x_vals = []
     y_vals = []
     z_vals = []
-
     for p1, p2, direction in numerical_values:
         x_vals.extend([p1[0], p2[0]])
         y_vals.extend([p1[1], p2[1]])
         z_vals.extend([p1[2], p2[2]])
-
     x_vals = np.array(x_vals)
     y_vals = np.array(y_vals)
     z_vals = np.array(z_vals)
-
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-
     # Plot each line segment
     for p1, p2, direction in numerical_values:
         ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], marker='o')
-
     # Set labels and title
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
