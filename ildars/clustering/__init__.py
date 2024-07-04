@@ -1,6 +1,6 @@
 import sys
 sys.path.append ('../ILDARSrevised')
-import copy
+import toml
 from enum import Enum
 from ildars.clustering import inversion
 from ildars.clustering import projection
@@ -13,9 +13,6 @@ ClusteringAlgorithm = Enum(
 
 def compute_reflection_clusters(clustering_algorithm, reflected_signals):
     clusters = None
-    # This is used to Test and Visualize some of the Functions in the HDBSCAN Clustering algorithm
-    # density_based.test_HDB(reflected_signals)
-
     if clustering_algorithm is ClusteringAlgorithm.GNOMONIC_PROJECTION:
         clusters = projection.compute_reflection_clusters_GP(reflected_signals)
     elif clustering_algorithm is ClusteringAlgorithm.INVERSION:

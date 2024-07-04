@@ -1,8 +1,7 @@
 # Configure error setup and specify algorithms to run
 
-[general]
-# Visualization will be generated iff. iterations are set to 1
-iterations = 100
+[general]                               # Visualization can be generated iff. iterations are set to 1 using Sender_Visualization.ipynb
+iterations = 1
 random_receiver = false
 num_senders = 20
     
@@ -11,8 +10,8 @@ num_senders = 20
     y = 0
     z = 0
 
-[simulation]
-# Pick which room should be used
+
+[simulation]                            # Pick which room should be used
 #room = "TEST1ROOM"
 room = "PYRAMIDROOM"
 #room = "CONCERTHALL"
@@ -20,25 +19,27 @@ room = "PYRAMIDROOM"
 #room = "BIG_CUBE"
 #room = "TEST1ROOMNEW"
 
-# Mark as True if the Senderboxes should use the dynamic generated boxes defined in signal_simulation.py 
-dynamic_senderbox = false
-# Mark as True if senderlocations calculated outside of the room to be removed from the .csv
-post_processing = true
+dynamic_senderbox = false               # Mark as True if the Senderboxes should use the dynamic generated boxes defined in signal_simulation.py 
+post_processing = true                  # Mark as True if senderlocations calculated outside of the room to be removed from the .csv
 
 
-[error]
-# Simulated errors. To remove them, make them = 0
+[error]                                 # Simulated errors. To remove them, make them = 0
 von_mises_concentration = 0 # 132.312   # expected 5 deg angular std. deviation
 delta_error = 0 # 0.1                   # 10cm standard deviation
 wall_error = 0 # 0.05                   # 5% of reflection will be assigned wrongly
+
+
+[testing]
+hdbscan_test = true                     # Set as true if you want visualizations of hdbscan. Hdbscan clustering algorithm must be true too to work.
+
 
 [algorithms]
 
     [algorithms.clustering]
     inversion = false
-    projection = true
+    projection = false
     dbscan = false
-    hdbscan = false
+    hdbscan = true
 
     [algorithms.wall_normal]
     all_pairs = true

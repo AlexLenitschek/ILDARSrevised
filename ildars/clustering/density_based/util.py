@@ -214,7 +214,7 @@ def visualize_circular_segments(numerical_values):
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    ax.set_title('Visual Representation of Segments')
+    ax.set_title('Visual Representation of Circular Segments Endpoints')
 
     plt.show()
 
