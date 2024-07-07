@@ -85,6 +85,14 @@ def compute_reflection_clusters_HDB(reflected_signals):
         # Printing the Mutual Reachability Distance Matrix
         print("mutual_reachability_distances: \n")
         print(mutual_reachability_distances)
+        print("############################################################################## \n")
+
+        # Printing the MST
+        print("Minimum Spanning tree: \n")
+        util.visualize_mst(mst)
+        util.print_non_zero_entries(mst)
+        print(mst)
+
 
     return clusters
 
@@ -164,15 +172,32 @@ def compute_mutual_reachability_distances(line_segments, core_distances):
     return mutual_reachability_distances
 
 
-# Implementation to construct the MST from mutual reachability distances
-def construct_mst(mutual_reachability_distances): 
+# Implementation to construct the MST from mutual reachability distances using Kruskal's Algorithm
+def construct_mst(mutual_reachability_distances):
     # A minimum spanning tree of a weighted graph is a subset of the edges that connects all vertices together, 
     # without any cycles, and with the minimum possible total edge weight.
-
     # The MST is needed to create the hierarchical structure required for the next steps in HDBSCAN. 
     # The MST represents the connectivity of points based on their mutual reachability distances, 
     # which directly influences the formation of clusters in the hierarchical clustering process.
-    pass
+
+    num_segments = mutual_reachability_distances.shape[0] # Determines the number of linesegments from the shape of the distance matrix.
+    edges = [] # Initializes an empty list to store all the edges in the graph.
+
+    # Convert the distance matrix to a list of edges:
+    for i in range(num_segments): # Because distance from i to j is same as distance from j to i we only consider the upper triangle.
+        for j in range(i + 1, num_segments):
+            if mutual_reachability_distances[i, j] > 0: # Only handling the legal cases. (mutual_r_d will most likely always be >0 because core distances are usualy always positive)
+                edges.append((mutual_reachability_distances[i, j], i, j)) # Adds each edge as a tuple (distance, node1, node2) to the edges list.
+
+    edges.sort() # Sort edges by weight
+    disjoint_set = util.DisjointSet(num_segments) # Initializes a Disjoint Set (Union-Find) data structure.
+    mst = np.zeros((num_segments, num_segments)) # Initializes an adjacency matrix to store the MST with zeros.
+    for weight, u, v in edges:
+        if disjoint_set.find(u) != disjoint_set.find(v): # Checks if the current edge connects two different components (i.e., it doesn't form a cycle).
+            disjoint_set.union(u, v) # Unites u and v
+            mst[u, v] = mst[v, u] = weight # Adds the edge to the MST by updating the adjacency matrix.
+    
+    return mst
 
 
 # Implementation to extract the cluster hierarchy from the MST
@@ -184,7 +209,7 @@ def extract_cluster_hierarchy(mst):
     # Extracting the cluster hierarchy is a critical step because it lays the foundation for the next step, 
     # where stable clusters are identified and condensed. 
     # The hierarchical structure allows HDBSCAN to select the most meaningful clusters based on stability and density, 
-    # leading to robust clustering results.
+    # leading to robust clustering results.0
     pass
 
 

@@ -3,6 +3,7 @@ sys.path.append ('../ILDARSrevised')
 import numpy as np
 import math
 import pandas as pd
+import networkx as nx
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from enum import Enum
@@ -151,6 +152,35 @@ class Line:
             + " and direction "
             + str(self.direction)
         )
+    
+# Implementation using Kruskal's Algorithm according to 
+# https://pythontpoint.org/tutorial/daa/disjoint-Set-&-their-implementation-in-daa.php
+class DisjointSet:
+# A disjoint set is a data structure that keeps track of a partitioning of a set into disjoint subsets. 
+# It provides two main operations: finding the representative (root) of a set to which an element belongs using find
+# and merging two sets together using union.
+    def __init__(self, n):
+        self.parent = list(range(n)) # Initialize Parent array
+        self.rank = [0] * n # Initialize Size array with 0s 
+
+    def find(self, u): # Finds the representative of the set that u is an element of
+        if self.parent[u] != u: # if u is not the parent of itself then u is not the representative of its set,
+            self.parent[u] = self.find(self.parent[u]) # so we recursively call Find on its parent. 
+        return self.parent[u]
+
+    def union(self, u, v): # method to unite the sets containing elements u and v.
+        root_u = self.find(u) # Finds the root of the set containing u
+        root_v = self.find(v) # Finds the root of the set containing v
+
+        if root_u != root_v: # Checks if u and v are in different sets by comparing their roots.
+            if self.rank[root_u] > self.rank[root_v]: # If the tree rooted at root_u is taller, make root_v a child of root_u.
+                self.parent[root_v] = root_u
+            elif self.rank[root_u] < self.rank[root_v]: # If the tree rooted at root_v is taller, make root_u a child of root_v.
+                self.parent[root_u] = root_v
+            else: # If both trees have the same rank, make one root the parent of the other.
+                self.parent[root_v] = root_u
+                self.rank[root_u] += 1 # Increases the rank of the new root root_u by 1 because the height of the tree has increased.
+
 
 # utils taken from math_util
 
@@ -237,3 +267,27 @@ def visualize_line_segments(numerical_values):
     ax.set_title('Visual Representation of Line Segments')
 
     plt.show()
+
+def visualize_mst(matrix):
+    G = nx.Graph()
+    for i in range(matrix.shape[0]):
+        for j in range(i + 1, matrix.shape[1]):
+            if matrix[i, j] > 0:
+                G.add_edge(i, j, weight=matrix[i, j])
+    
+    pos = nx.spring_layout(G)
+    weights = nx.get_edge_attributes(G, 'weight')
+    nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=weights)
+    plt.title("MST Visualization")
+    plt.show()
+
+def print_non_zero_entries(matrix):
+    non_zero_entries = []
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[1]):
+            if matrix[i, j] > 0:
+                non_zero_entries.append((i, j, matrix[i, j]))
+    print("Non-zero entries in the MST (format: (i, j, weight)):")
+    for entry in non_zero_entries:
+        print(entry)
