@@ -11,6 +11,7 @@ import toml
 import ildars.math_utils as util
 from ildars.clustering.cluster import ReflectionCluster
 import re # Regular Expressions
+#from ete3 import Tree, TreeStyle, TextFace, add_face_to_node
 # Very small number
 EPSILON = 0.000000001
 
@@ -162,6 +163,7 @@ class DisjointSet:
     def __init__(self, n):
         self.parent = list(range(n)) # Initialize Parent array
         self.rank = [0] * n # Initialize Size array with 0s 
+        self.size = n
 
     def find(self, u): # Finds the representative of the set that u is an element of
         if self.parent[u] != u: # if u is not the parent of itself then u is not the representative of its set,
@@ -181,6 +183,14 @@ class DisjointSet:
                 self.parent[root_v] = root_u
                 self.rank[root_u] += 1 # Increases the rank of the new root root_u by 1 because the height of the tree has increased.
 
+    def find_all(self):
+        clusters = {}
+        for u in range(len(self.parent)):
+            root = self.find(u)
+            if root not in clusters:
+                clusters[root] = []
+            clusters[root].append(u)
+        return clusters
 
 # utils taken from math_util
 
@@ -291,3 +301,18 @@ def print_non_zero_entries(matrix):
     print("Non-zero entries in the MST (format: (i, j, weight)):")
     for entry in non_zero_entries:
         print(entry)
+
+
+# Small testing function for condense hierarchy in HDBSCAN to see if all clusters are unique
+def find_duplicates(cluster_dict):
+    cluster_sets = {}
+    duplicates = []
+    
+    for cluster_id, cluster_set in cluster_dict.items():
+        cluster_tuple = tuple(sorted(cluster_set[0]))
+        if cluster_tuple in cluster_sets:
+            duplicates.append((cluster_sets[cluster_tuple], cluster_id))
+        else:
+            cluster_sets[cluster_tuple] = cluster_id
+            
+    return duplicates

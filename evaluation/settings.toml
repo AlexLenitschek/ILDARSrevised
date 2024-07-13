@@ -36,7 +36,7 @@ hdbscan_test = true                     # Set as true if you want visualizations
 [algorithms]
 
     [algorithms.clustering]
-    inversion = false
+    inversion = true
     projection = false
     dbscan = false
     hdbscan = true

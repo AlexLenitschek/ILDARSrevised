@@ -7,7 +7,6 @@ import toml
 import numpy as np
 
 from ildars.localization.sender_localization import LocalizationAlgorithm
-
 from evaluation.runner import Runner
 from evaluation import testrooms
 from evaluation.export_results import export_experiment_results
