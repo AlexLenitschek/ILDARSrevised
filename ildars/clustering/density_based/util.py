@@ -153,44 +153,83 @@ class Line:
             + " and direction "
             + str(self.direction)
         )
-    
-# Implementation using Kruskal's Algorithm according to 
-# https://pythontpoint.org/tutorial/daa/disjoint-Set-&-their-implementation-in-daa.php
-class DisjointSet:
-# A disjoint set is a data structure that keeps track of a partitioning of a set into disjoint subsets. 
-# It provides two main operations: finding the representative (root) of a set to which an element belongs using find
-# and merging two sets together using union.
-    def __init__(self, n):
-        self.parent = list(range(n)) # Initialize Parent array
-        self.rank = [0] * n # Initialize Size array with 0s 
-        self.size = n
 
-    def find(self, u): # Finds the representative of the set that u is an element of
-        if self.parent[u] != u: # if u is not the parent of itself then u is not the representative of its set,
-            self.parent[u] = self.find(self.parent[u]) # so we recursively call Find on its parent. 
+# # https://pythontpoint.org/tutorial/daa/disjoint-Set-&-their-implementation-in-daa.php
+# class DisjointSet:
+# # A disjoint set is a data structure that keeps track of a partitioning of a set into disjoint subsets. 
+# # It provides two main operations: finding the representative (root) of a set to which an element belongs using find
+# # and merging two sets together using union.
+#     def __init__(self, n):
+#         self.parent = list(range(n)) # Initialize Parent array
+#         self.rank = [0] * n # Initialize Size array with 0s 
+#         self.size = n
+
+#     def find(self, u): # Finds the representative of the set that u is an element of
+#         if self.parent[u] != u: # if u is not the parent of itself then u is not the representative of its set,
+#             self.parent[u] = self.find(self.parent[u]) # so we recursively call Find on its parent. 
+#         return self.parent[u]
+
+#     def union(self, u, v): # method to unite the sets containing elements u and v.
+#         root_u = self.find(u) # Finds the root of the set containing u
+#         root_v = self.find(v) # Finds the root of the set containing v
+
+#         if root_u != root_v: # Checks if u and v are in different sets by comparing their roots.
+#             if self.rank[root_u] > self.rank[root_v]: # If the tree rooted at root_u is taller, make root_v a child of root_u.
+#                 self.parent[root_v] = root_u
+#             elif self.rank[root_u] < self.rank[root_v]: # If the tree rooted at root_v is taller, make root_u a child of root_v.
+#                 self.parent[root_u] = root_v
+#             else: # If both trees have the same rank, make one root the parent of the other.
+#                 self.parent[root_v] = root_u
+#                 self.rank[root_u] += 1 # Increases the rank of the new root root_u by 1 because the height of the tree has increased.
+
+class DisjointSet:
+    def __init__(self, n):
+        self.parent = list(range(n))    # Initialize Parent array
+        self.rank = [0] * n     # Initialize Size array with 0s
+
+    def find(self, u):  # Finds the representative of the set that u is an element of (Basically if it is in a cluster, then this cluster will be found)
+        if self.parent[u] != u:
+            self.parent[u] = self.find(self.parent[u])  # Path compression
         return self.parent[u]
 
-    def union(self, u, v): # method to unite the sets containing elements u and v.
-        root_u = self.find(u) # Finds the root of the set containing u
-        root_v = self.find(v) # Finds the root of the set containing v
-
-        if root_u != root_v: # Checks if u and v are in different sets by comparing their roots.
-            if self.rank[root_u] > self.rank[root_v]: # If the tree rooted at root_u is taller, make root_v a child of root_u.
+    def union(self, u, v):  # method to unite the sets containing elements u and v.
+        root_u = self.find(u)
+        root_v = self.find(v)
+        if root_u != root_v:
+            if self.rank[root_u] > self.rank[root_v]:
                 self.parent[root_v] = root_u
-            elif self.rank[root_u] < self.rank[root_v]: # If the tree rooted at root_v is taller, make root_u a child of root_v.
+                return root_u
+            elif self.rank[root_u] < self.rank[root_v]:
                 self.parent[root_u] = root_v
-            else: # If both trees have the same rank, make one root the parent of the other.
+                return root_v
+            else:
                 self.parent[root_v] = root_u
-                self.rank[root_u] += 1 # Increases the rank of the new root root_u by 1 because the height of the tree has increased.
+                self.rank[root_u] += 1
+                return root_u
+        return root_u
 
-    def find_all(self):
-        clusters = {}
-        for u in range(len(self.parent)):
-            root = self.find(u)
-            if root not in clusters:
-                clusters[root] = []
-            clusters[root].append(u)
-        return clusters
+    def add_cluster(self, cluster_id):  # Adds a parent to a specific cluster
+        self.parent.append(cluster_id)
+        self.rank.append(0)
+
+    def update_parent(self, elements, new_root):    # Updates a clusters parent
+        for element in elements:
+            self.parent[element] = new_root
+
+# Class needed to construct the hierarchy.
+class ClusterNode:
+    def __init__(self, cluster_id, elements, birth_distance, death_distance, children=None):
+        self.cluster_id = cluster_id
+        self.elements = elements
+        self.birth_distance = birth_distance
+        self.death_distance = death_distance
+        self.children = children if children else []
+        self.stability = 0
+
+    def __repr__(self):
+        return (f"ClusterNode(id={self.cluster_id}, elements={self.elements}, "
+                f"birth_distance={self.birth_distance}, death_distance={self.death_distance}, "
+                f"children={[child.cluster_id for child in self.children]}, stability={self.stability})")
 
 # utils taken from math_util
 
@@ -302,17 +341,36 @@ def print_non_zero_entries(matrix):
     for entry in non_zero_entries:
         print(entry)
 
+# # Small testing function for condense hierarchy in HDBSCAN to see if all clusters are unique
+# def find_duplicates(cluster_dict):
+#     cluster_sets = {}
+#     duplicates = []
+    
+#     for cluster_id, cluster_set in cluster_dict.items():
+#         cluster_tuple = tuple(sorted(cluster_set[0]))
+#         if cluster_tuple in cluster_sets:
+#             duplicates.append((cluster_sets[cluster_tuple], cluster_id))
+#         else:
+#             cluster_sets[cluster_tuple] = cluster_id
+            
+#     return duplicates
 
-# Small testing function for condense hierarchy in HDBSCAN to see if all clusters are unique
 def find_duplicates(cluster_dict):
     cluster_sets = {}
     duplicates = []
-    
-    for cluster_id, cluster_set in cluster_dict.items():
-        cluster_tuple = tuple(sorted(cluster_set[0]))
+
+    for cluster_id, cluster_info in cluster_dict.items():
+        if isinstance(cluster_info, dict):
+            cluster_set = cluster_info['elements']
+        elif isinstance(cluster_info, list):
+            cluster_set = set(cluster_info)
+        else:
+            raise TypeError(f"Unexpected type for cluster_info: {type(cluster_info)}")
+
+        cluster_tuple = frozenset(cluster_set)
         if cluster_tuple in cluster_sets:
             duplicates.append((cluster_sets[cluster_tuple], cluster_id))
         else:
             cluster_sets[cluster_tuple] = cluster_id
-            
+
     return duplicates

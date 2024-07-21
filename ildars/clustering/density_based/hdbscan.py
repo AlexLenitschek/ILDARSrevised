@@ -8,9 +8,6 @@ import toml
 import logging
 import pandas as pd
 import networkx as nx
-from scipy.cluster.hierarchy import dendrogram
-from scipy.spatial.distance import squareform
-from scipy.cluster.hierarchy import linkage
 from collections import defaultdict 
 from ildars.clustering.cluster import ReflectionCluster
 import copy
@@ -23,9 +20,9 @@ hdbscan_testing = settings["testing"]["hdbscan_test"]
 
 # Threshold needed for the core distance of the line_segments. 
 # core_distance for a line_segment = euclidian distance to min_samples-th closest neighbor.
-min_samples = 15
+min_samples = 5
 # Minimum cluster size, clusters smaller than min_cluster_size are discarded.
-min_cluster_size = 10
+min_cluster_size = 5
 
 # # Main Function that calls all the functions to create the clusters
 # def compute_reflection_clusters_HDB(reflected_signals):
@@ -46,9 +43,6 @@ min_cluster_size = 10
 #     # clusters = condense_cluster_hierarchy(cluster_hierarchy, cluster_stability)
 #     # # Extra Step: Transform the clusters into the Type used in this Pipeline (ReflectionCluster).
 
-#     hierarchy = build_cluster_hierarchy(mst, n)
-#     condensed_tree = condense_cluster_tree(hierarchy, min_cluster_size)
-#     stable_clusters = extract_clusters(condensed_tree)
     
 #     reflection_clusters = transform_clusters(stable_clusters, line_segments)
 #     print("Clusters:", stable_clusters)  # Debug print
@@ -73,70 +67,82 @@ def compute_reflection_clusters_HDB(reflected_signals):
     mst = construct_mst(mutual_reachability_distances)
     mst1 = copy.deepcopy(mst)
 
-    # Step 6: Condense the Minimum Spanning tree into a hierarchy of cluster splits where splits with sets smaller than min_cluster_size are removed.
-    condensed = condense_tree(mst, min_cluster_size)
-    
-    # Step 7: Stability calculation.
+    # Step 6: Constructs the cluster hierarchy where every parent has the childrens ID saved.
+    hierarchy = construct_hierarchy(mst1)
 
-    # Step 8: Extracting the clusters with the best stability.
+    # Step 7: Condense the Minimum Spanning tree into a hierarchy of cluster splits where splits with sets smaller than min_cluster_size are removed.
+    # condensed_hierarchy = condense_hierarchy(hierarchy, min_cluster_size)
 
+    # Step 8: Extracting the Clusters.
+    #extracted_clusters = extract_clusters(condensed)
+
+    # Step 9: Transforming the Clusters into the desired Form. (ReflectionClusters)
+    #final_clusters = transform_clusters(stable_clusters, line_segments)
 
     # THE FOLLOWING IS USED TO VISUALIZE SOME OF THE STEPS ABOVE TO HAVE A BETTER UNDERSTANDING OF WHAT IS HAPPENING.
     if hdbscan_testing == True:
-#         # print("Circular Segments: \n")
-#         # numerical_values = []
-#         # for circ_segment in circular_segments:
-#         #     print(circ_segment)
-#         #     p1 = circ_segment.p1
-#         #     p2 = circ_segment.p2
-#         #     numerical_values.append((p1, p2))
-#         # util.visualize_circular_segments(numerical_values)
-#         # print("############################################################################## \n")
+    #     print("Circular Segments: \n")
+    #     numerical_values = []
+    #     for circ_segment in circular_segments:
+    #         print(circ_segment)
+    #         p1 = circ_segment.p1
+    #         p2 = circ_segment.p2
+    #         numerical_values.append((p1, p2))
+    #     util.visualize_circular_segments(numerical_values)
+    #     print("############################################################################## \n")
 
-#         # print("Line Segments: \n")
-#         # for line in line_segments:
-#         #     print(line)
-#         #     line_numerical_values = [(line.p1, line.p2, line.direction) for line in line_segments]
-#         # # Visualize line segments
-#         # util.visualize_line_segments(line_numerical_values)
-#         # print("############################################################################## \n")
+    #     print("Line Segments: \n")
+    #     for line in line_segments:
+    #         print(line)
+    #         line_numerical_values = [(line.p1, line.p2, line.direction) for line in line_segments]
+    #     # Visualize line segments
+    #     util.visualize_line_segments(line_numerical_values)
+    #     print("############################################################################## \n")
 
-#         # print("Core Distances: \n")
-#         # print(core_distances)
-#         # # Plotting a histogram
-#         # plt.figure(figsize=(10, 6))
-#         # plt.hist(core_distances, bins=20, edgecolor='black')
-#         # plt.title('Histogram of Core Distances')
-#         # plt.xlabel('Core Distance')
-#         # plt.ylabel('Frequency')
-#         # plt.grid(True)
-#         # plt.show()
+    #     print("Core Distances: \n")
+    #     print(core_distances)
+    #     # Plotting a histogram
+    #     plt.figure(figsize=(10, 6))
+    #     plt.hist(core_distances, bins=20, edgecolor='black')
+    #     plt.title('Histogram of Core Distances')
+    #     plt.xlabel('Core Distance')
+    #     plt.ylabel('Frequency')
+    #     plt.grid(True)
+    #     plt.show()
 
-#         # # Plotting a line plot
-#         # plt.figure(figsize=(10, 6))
-#         # plt.plot(core_distances, marker='o')
-#         # plt.title('Line Plot of Core Distances')
-#         # plt.xlabel('Index')
-#         # plt.ylabel('Core Distance')
-#         # plt.grid(True)
-#         # plt.show()
-#         # print("############################################################################## \n")
+        # # Plotting a line plot
+        # plt.figure(figsize=(10, 6))
+        # plt.plot(core_distances, marker='o')
+        # plt.title('Line Plot of Core Distances')
+        # plt.xlabel('Index')
+        # plt.ylabel('Core Distance')
+        # plt.grid(True)
+        # plt.show()
+        # print("############################################################################## \n")
 
-#         # Printing the Mutual Reachability Distance Matrix
-#         print("mutual_reachability_distances: \n")
-#         print(mutual_reachability_distances)
-#         print("############################################################################## \n")
+        # # Printing the Mutual Reachability Distance Matrix
+        # print("mutual_reachability_distances: \n")
+        # print(mutual_reachability_distances)
+        # print("############################################################################## \n")
 
-        # Prints the mst into the terminal
-        print("MST Constructed: \n", mst1)
-        # prints the entries only that are not 0
-        util.print_non_zero_entries(mst1)
-        print("Condensed Tree:", dict(condensed))
-        duplicates = util.find_duplicates(condensed)
-        print("Duplicates:", duplicates)
+        # # Prints the mst into the terminal
+        # print("MST Constructed: \n", mst1)
+        # # prints the entries only that are not 0
+        # util.print_non_zero_entries(mst1)
+
+        #duplicates = util.find_duplicates(condensed)
+        #print("Duplicates:", duplicates)
+
         util.visualize_mst(mst1)
+        print("MST. \n", mst)
 
-    return condensed
+        # Print hierarchy clusters
+        for key, cluster in hierarchy.items():
+            print(f"Cluster {key}: {cluster}")
+
+
+    pass
+    #return hierarchy
 
 # Step 1: Create line segment list with the inverted circular segments
 # Helper Function of Milan that creates circular segments
@@ -241,112 +247,75 @@ def construct_mst(mutual_reachability_distances):
     
     return mst
 
-# # Step 6: Condense the mst into a hierarchy filtering out subsets with less than min_cluster_size elements
-# # Implementation to condense the cluster hierarchy into clusters
-def condense_tree(mst, min_cluster_size):
+
+def construct_hierarchy(mst):
     num_segments = mst.shape[0]
-    edges = [(mst[i, j], i, j) for i in range(num_segments) for j in range(i + 1, num_segments) if mst[i, j] > 0]
-    edges.sort(reverse=True)  # Sort edges in descending order by weight
+    edges = []
+    # Collect all edges from the MST matrix with positive weights (upper triangle)
+    for i in range(num_segments):
+        for j in range(i + 1, num_segments):
+            if mst[i, j] > 0:
+                edges.append((mst[i, j], i, j))
 
-    initial_cluster = set(range(num_segments))  # The initial parent node contains all elements
-    hierarchy = {0: [initial_cluster]}  # Start the hierarchy with the initial parent node
-    current_clusters = {0: initial_cluster}  # Track current clusters
-    cluster_id = 1  # ID for new clusters
+    edges.sort()    # Sort edges by weight
+    min_edge_weight = edges[0][0] if edges else float('inf')    # Define smallest weight for initial birth_distance
+    clusters = {}
+    disjoint_set = util.DisjointSet(num_segments)
+    # Initialize clusters with death_distance as min_edge_weight
+    for i in range(num_segments):
+        clusters[i] = util.ClusterNode(
+            cluster_id=i,
+            elements=[i],
+            birth_distance=float('inf'),
+            death_distance=min_edge_weight
+        )
 
-    def get_subclusters(components):
-        valid_subclusters = []
-        for component in components:
-            if len(component) >= min_cluster_size:
-                valid_subclusters.append(component)
-        return valid_subclusters
-
-    removed_edges = set()
-    existing_clusters = set()
-
-    # Remove edges one by one and check for valid splits
+    cluster_counter = num_segments
     for weight, u, v in edges:
-        if (u, v) in removed_edges or (v, u) in removed_edges:
-            continue
+        root_u = disjoint_set.find(u)
+        root_v = disjoint_set.find(v)
 
-        # Remove the heaviest edge
-        mst[u, v] = mst[v, u] = 0
-        removed_edges.add((u, v))
-        removed_edges.add((v, u))
+        if root_u != root_v:
+            #print(f"Merging clusters {root_u} and {root_v} with edge weight {weight}")
 
-        # Convert MST to a graph and find connected components
-        graph = nx.from_numpy_array(mst)
-        components = list(nx.connected_components(graph))
+            # Create a new cluster by merging root_u and root_v
+            new_cluster = util.ClusterNode(
+                cluster_id=cluster_counter,
+                elements=clusters[root_u].elements + clusters[root_v].elements,
+                birth_distance=float('inf'),
+                death_distance=weight,
+                children=[clusters[root_u], clusters[root_v]]
+            )
 
-        if len(components) <= 1:
-            continue
+            # Update the birth_distance of the merged clusters
+            clusters[root_u].birth_distance = weight
+            clusters[root_v].birth_distance = weight
 
-        subclusters = get_subclusters(components)
+            # Union the sets in the disjoint set structure and update the new root
+            new_root = disjoint_set.union(root_u, root_v)
 
-        if len(subclusters) >= 2:
-            # Find the affected cluster
-            affected_cluster_id = None
-            for current_cluster_id, current_cluster in current_clusters.items():
-                if u in current_cluster or v in current_cluster:
-                    affected_cluster_id = current_cluster_id
-                    break
+            # Add the new cluster to the disjoint set and update parents
+            disjoint_set.add_cluster(cluster_counter)
+            disjoint_set.update_parent(new_cluster.elements, cluster_counter)
 
-            if affected_cluster_id is not None:
-                # Remove the affected cluster from current clusters
-                del current_clusters[affected_cluster_id]
+            # Add the new cluster to the clusters dictionary
+            clusters[cluster_counter] = new_cluster
 
-                # Add new subclusters to current clusters
-                for subcluster in subclusters:
-                    frozenset_subcluster = frozenset(subcluster)
-                    if frozenset_subcluster not in existing_clusters:
-                        current_clusters[cluster_id] = subcluster
-                        hierarchy[cluster_id] = [subcluster]
-                        existing_clusters.add(frozenset_subcluster)
-                        cluster_id += 1
+            #print(f"New root after union: {new_root}")
 
-        elif len(subclusters) == 1:
-            # If only one valid subcluster, update the parent node
-            valid_subcluster = subclusters[0]
-            remaining_nodes = initial_cluster - valid_subcluster
-            if len(remaining_nodes) >= min_cluster_size:
-                frozenset_valid_subcluster = frozenset(valid_subcluster)
-                if frozenset_valid_subcluster not in existing_clusters:
-                    hierarchy[cluster_id] = [valid_subcluster]
-                    current_clusters[cluster_id] = valid_subcluster
-                    existing_clusters.add(frozenset_valid_subcluster)
-                    cluster_id += 1
-                # Remove edges related to the invalid subcluster
-                for node in remaining_nodes:
-                    for i in range(num_segments):
-                        if mst[node, i] > 0:
-                            mst[node, i] = mst[i, node] = 0
-                            removed_edges.add((node, i))
-                            removed_edges.add((i, node))
-        else:
-            # If both resulting clusters are invalid, do not update the hierarchy and undo the edge removal
-            mst[u, v] = mst[v, u] = weight
-            removed_edges.remove((u, v))
-            removed_edges.remove((v, u))
+            # Increment the cluster counter
+            cluster_counter += 1
 
-    return hierarchy
+    # Create the final clusters dictionary sorted by cluster_id
+    final_clusters = {i: clusters[i] for i in sorted(clusters.keys())}
 
-# # Step 7: Extract the cluster hierarchy from the MST
-# # Implementation to extract the cluster hierarchy from the MST
-# def extract_cluster_hierarchy(mst): 
-#     # The MST obtained from the mutual reachability distances can be interpreted as a hierarchical clustering structure. 
-#     # By progressively removing edges from the MST (starting with the longest), we can form a hierarchy of clusters. 
-#     # The other way around would also work i.e. Adding edges and recording the clustercreations. 
-#     # But I like the Idea of removing them more so we'll go with that hehe.
-#     # This process effectively builds a dendrogram, where each level of the dendrogram corresponds to a different set of clusters.
-#     # Extracting the cluster hierarchy is a critical step because it lays the foundation for the next step, 
-#     # where stable clusters are identified and condensed. 
-#     # The hierarchical structure allows HDBSCAN to select the most meaningful clusters based on stability and density, 
-#     # leading to robust clustering results.
-#     pass
+    return final_clusters
+
 
 def transform_clusters(clusters, line_segments):
     reflection_clusters = []
     
-    for cluster_points in clusters.values():
+    for cluster_points in clusters:
         cluster_lines = [line_segments[idx] for idx in cluster_points]  # Get the actual line segments
         reflected_signals = lines_to_reflected_signals(cluster_lines)  # Convert lines to reflected signals
         reflection_cluster = ReflectionCluster(reflected_signals)  # Create a ReflectionCluster object
