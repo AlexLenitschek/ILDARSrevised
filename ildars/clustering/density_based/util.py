@@ -218,20 +218,21 @@ class DisjointSet:
 
 # Class needed to construct the hierarchy.
 class ClusterNode:
-    def __init__(self, cluster_id, elements, birth_distance, death_distance, children=None):
+    def __init__(self, cluster_id, elements, birth_distance, death_distance, children=None, parent=None):
         self.cluster_id = cluster_id
         self.elements = elements
         self.birth_distance = birth_distance
         self.death_distance = death_distance
         self.children = children if children else []
         self.stability = 0
+        self.parent = parent
+        #self.flag = 'Default'
 
     def __repr__(self):
+        children_ids = [child.cluster_id if child is not None else None for child in self.children]
         return (f"ClusterNode(id={self.cluster_id}, elements={self.elements}, "
                 f"birth_distance={self.birth_distance}, death_distance={self.death_distance}, "
-                f"children={[child.cluster_id for child in self.children]}, stability={self.stability})")
-
-# utils taken from math_util
+                f"children={children_ids}, stability={self.stability})")
 
 # For a given vector, returns the parallel unit vector
 def normalize(v: np.array) -> np.array:

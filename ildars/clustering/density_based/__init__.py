@@ -14,9 +14,9 @@ def compute_reflection_clusters_DB(reflected_signals):
 def compute_reflection_clusters_HDB(reflected_signals):
     clusters = hdbscan.compute_reflection_clusters_HDB(reflected_signals)
     # print("\nDEBUG STATISTICS FOR HDBSCAN: ")
-    # print("Reflection Clusters:")
-    # for cluster in clusters:
-    #     print(cluster)
+    print("Reflection Clusters:")
+    for cluster in clusters:
+        print(cluster)
     return clusters
 
 # def compute_reflection_clusters_HDB(reflected_signals):
