@@ -318,6 +318,22 @@ def visualize_line_segments(numerical_values):
 
     plt.show()
 
+# def visualize_mst(matrix):
+#     G = nx.Graph()
+#     for i in range(matrix.shape[0]):
+#         for j in range(i + 1, matrix.shape[1]):
+#             if matrix[i, j] > 0:
+#                 G.add_edge(i, j, weight=matrix[i, j])
+    
+#     pos = nx.spring_layout(G)
+#     weights = nx.get_edge_attributes(G, 'weight')
+#     nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
+#     nx.draw_networkx_edge_labels(G, pos, edge_labels=weights)
+#     plt.title("MST Visualization")
+#     plt.show()
+
+# cluster_colors = ['red', 'blue', 'green', 'purple', 'orange', 'yellow', 'cyan', 'magenta', 'brown', 'turqoise', 'pink', 'white']  # Define more colors if needed
+
 def visualize_mst(matrix):
     G = nx.Graph()
     for i in range(matrix.shape[0]):
@@ -325,12 +341,39 @@ def visualize_mst(matrix):
             if matrix[i, j] > 0:
                 G.add_edge(i, j, weight=matrix[i, j])
     
-    pos = nx.spring_layout(G)
+    pos = nx.kamada_kawai_layout(G, weight='weight')
     weights = nx.get_edge_attributes(G, 'weight')
     nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
     nx.draw_networkx_edge_labels(G, pos, edge_labels=weights)
     plt.title("MST Visualization")
     plt.show()
+
+def visualize_mst_with_clusters(mst, clusters, line_segments):
+    G = nx.Graph(mst)
+    node_colors = ['lightgrey'] * len(line_segments)  # Default color for noise points
+    
+    # Create a mapping of element to cluster index
+    element_to_cluster = {}
+    for i, cluster in enumerate(clusters):
+        for element in cluster.elements:
+            element_to_cluster[element] = i
+
+    # Assign colors to nodes
+    for node in range(len(line_segments)):
+        if node in element_to_cluster:
+            node_colors[node] = f"C{element_to_cluster[node]}"  # Use matplotlib color cycle for clustered points
+        # Nodes not in any cluster remain 'lightgrey'
+
+    # Use Kamada-Kawai layout for better visualization of distances
+    pos = nx.kamada_kawai_layout(G, weight='weight')
+    weights = nx.get_edge_attributes(G, 'weight')
+
+    # Draw the graph with node colors
+    nx.draw(G, pos, with_labels=True, node_color=node_colors, node_size=500, font_size=10)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=weights)
+    plt.title("MST Visualization with Clusters")
+    plt.show()
+
 
 def print_non_zero_entries(matrix):
     non_zero_entries = []

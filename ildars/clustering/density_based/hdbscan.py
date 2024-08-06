@@ -38,14 +38,17 @@ def compute_reflection_clusters_HDB(reflected_signals):
     # Step 3: Compute the core distances for each line segment.
     core_distances = compute_core_distances(line_segments)
     
-    # Step 4: Calculate the mutual reachability distances.
+    # Step 4: Calculate the mutual reachability distances using the core distances.
     mutual_reachability_distances = compute_mutual_reachability_distances(line_segments, core_distances)
     
     
-    # Step 5: Construct the minimum spanning tree (MST) from the mutual reachability distances.
+    # Step 5: Construct the minimum spanning tree (MST) from the mutual reachability distances using kruskal.
     mst = construct_mst(mutual_reachability_distances)
     mst1 = copy.deepcopy(mst)
+    mst2 = copy.deepcopy(mst)
+    mst3 = copy.deepcopy(mst)
     
+    ## Used for testing. Using the same MST will give us the same hierarchy.
     # Save the array to a file
     #save_array_to_file(mst, 'mst_output.txt')
     # Load the array from the file
@@ -55,75 +58,81 @@ def compute_reflection_clusters_HDB(reflected_signals):
     hierarchy = construct_hierarchy(mst1)
 
     # Step 7: Condense the Minimum Spanning tree into a hierarchy of cluster splits where splits with sets smaller than min_cluster_size are removed.
-    condensed_hierarchy = condense_hierarchy(hierarchy, min_cluster_size)
+    # Additionally also preprocessing the single child chains to have a representative cluster of the whole chain.
+    condensed_hierarchy = condense_hierarchy(hierarchy, min_cluster_size, cluster_size_percentage_weight)
     condensed_hierarchy_copy = copy.deepcopy(condensed_hierarchy)
-
-    # Step 8: Extracting the Clusters.
     processed_hierarchy = preprocess_condensed(condensed_hierarchy_copy)
     processed_hierarchy_copy = copy.deepcopy(processed_hierarchy)
+
+    # Step 8: Extracting the Clusters.
     extracted_clusters = extract_clusters(processed_hierarchy_copy)
 
     # Step 9: Transforming the Clusters into the desired Form. (ReflectionClusters)
     final_clusters = transform_clusters(extracted_clusters, line_segments)
 
+    if not verify_cluster_indices(extracted_clusters, len(line_segments)):
+        print("Cluster indices are inconsistent with original data")
+
+    verify_index_consistency(mst, extracted_clusters, line_segments)
+
     # THE FOLLOWING IS USED TO VISUALIZE SOME OF THE STEPS ABOVE TO HAVE A BETTER UNDERSTANDING OF WHAT IS HAPPENING.
     if hdbscan_testing == True:
-        # Draws the Circular segment's connected endpoints.
-        print("Circular Segments: \n")
-        numerical_values = []
-        for circ_segment in circular_segments:
-            print(circ_segment)
-            p1 = circ_segment.p1
-            p2 = circ_segment.p2
-            numerical_values.append((p1, p2))
-        util.visualize_circular_segments(numerical_values)
-        print("############################################################################## \n")
+        # # Draws the Circular segment's connected endpoints.
+        # print("Circular Segments: \n")
+        # numerical_values = []
+        # for circ_segment in circular_segments:
+        #     print(circ_segment)
+        #     p1 = circ_segment.p1
+        #     p2 = circ_segment.p2
+        #     numerical_values.append((p1, p2))
+        # util.visualize_circular_segments(numerical_values)
+        # print("############################################################################## \n")
 
 
-        # Draws the Line segment's connected endpoints.
-        print("Line Segments: \n")
-        for line in line_segments:
-            print(line)
-            line_numerical_values = [(line.p1, line.p2, line.direction) for line in line_segments]
-        # Visualize line segments
-        util.visualize_line_segments(line_numerical_values)
-        print("############################################################################## \n")
+        # # Draws the Line segment's connected endpoints.
+        # print("Line Segments: \n")
+        # for line in line_segments:
+        #     print(line)
+        #     line_numerical_values = [(line.p1, line.p2, line.direction) for line in line_segments]
+        # # Visualize line segments
+        # util.visualize_line_segments(line_numerical_values)
+        # print("############################################################################## \n")
 
 
-        # Plots the Core Distances in a Histogram
-        print("Core Distances: \n")
-        print(core_distances)
-        plt.figure(figsize=(10, 6))
-        plt.hist(core_distances, bins=20, edgecolor='black')
-        plt.title('Histogram of Core Distances')
-        plt.xlabel('Core Distance')
-        plt.ylabel('Frequency')
-        plt.grid(True)
-        plt.show()
+        # # Plots the Core Distances in a Histogram
+        # print("Core Distances: \n")
+        # print(core_distances)
+        # plt.figure(figsize=(10, 6))
+        # plt.hist(core_distances, bins=20, edgecolor='black')
+        # plt.title('Histogram of Core Distances')
+        # plt.xlabel('Core Distance')
+        # plt.ylabel('Frequency')
+        # plt.grid(True)
+        # plt.show()
 
 
-        # Plotting a line plot
-        plt.figure(figsize=(10, 6))
-        plt.plot(core_distances, marker='o')
-        plt.title('Line Plot of Core Distances')
-        plt.xlabel('Index')
-        plt.ylabel('Core Distance')
-        plt.grid(True)
-        plt.show()
-        print("############################################################################## \n")
+        # # Plotting a line plot
+        # plt.figure(figsize=(10, 6))
+        # plt.plot(core_distances, marker='o')
+        # plt.title('Line Plot of Core Distances')
+        # plt.xlabel('Index')
+        # plt.ylabel('Core Distance')
+        # plt.grid(True)
+        # plt.show()
+        # print("############################################################################## \n")
 
 
-        # Printing the Mutual Reachability Distance Matrix
-        print("Mutual Reachability Distances Computed: \n", mutual_reachability_distances)
-        print("############################################################################## \n")
+        # # Printing the Mutual Reachability Distance Matrix
+        # print("Mutual Reachability Distances Computed: \n", mutual_reachability_distances)
+        # print("############################################################################## \n")
         
 
-        # prints the entries only that are not 0
-        util.print_non_zero_entries(mst1)
-        util.visualize_mst(mst1) # VISUALIZATION OF MST.
-        print("MST. \n", mst)
-        #duplicates = util.find_duplicates(condensed)
-        #print("Duplicates:", duplicates)
+        # # prints the entries only that are not 0
+        # util.print_non_zero_entries(mst1)
+        # util.visualize_mst(mst1) # VISUALIZATION OF MST.
+        # print("MST. \n", mst)
+        # #duplicates = util.find_duplicates(condensed)
+        # #print("Duplicates:", duplicates)
 
         
         # Print hierarchy clusters and calculate the total stability
@@ -159,8 +168,14 @@ def compute_reflection_clusters_HDB(reflected_signals):
 
         # Print the total stability (Debugging)
         print(f"Total stability: {total_stability}")
+        #util.visualize_mst(mst2) # VISUALIZATION OF MST.
+        # util.visualize_mst_with_clusters(mutual_reachability_distances, extracted_clusters, line_segments)
+        util.visualize_mst_with_clusters(mst3, extracted_clusters, line_segments)
 
     return final_clusters
+
+
+
 
 # Used to save a MST array. Was neccessary for testing.
 def save_array_to_file(array, filename):
@@ -353,14 +368,13 @@ def construct_hierarchy(mst):
 
     return hierarchy_clusters
 
-
-def condense_hierarchy(hierarchy_clusters, min_cluster_size, cluster_size_percentage_weight=0.1):
+def condense_hierarchy(hierarchy_clusters, min_cluster_size, cluster_size_percentage_weight):
     def convert_distances(cluster):
         cluster.birth_distance = 1 / cluster.birth_distance if cluster.birth_distance != float('inf') else float('inf')
         cluster.death_distance = 1 / cluster.death_distance if cluster.death_distance != 0 else float('inf')
 
     def calculate_stability(cluster):
-        cluster.stability = abs(cluster.birth_distance - cluster.death_distance) * len(cluster.elements)# * cluster_size_percentage_weight)
+        cluster.stability = abs(cluster.birth_distance - cluster.death_distance) * (len(cluster.elements) + np.log(len(cluster.elements)))# cluster_size_percentage_weight)
 
     def condense(cluster):
         #print(f"Condensing cluster {cluster.cluster_id} with elements {cluster.elements}")
@@ -409,11 +423,12 @@ def condense_hierarchy(hierarchy_clusters, min_cluster_size, cluster_size_percen
 
     return condensed_hierarchy
 
-
+# This version of preprocessing selects the cluster with the highest stability in the chain as the representative of the chain and removes all other chain clusters.
 def preprocess_condensed(condensed_hierarchy):
     def find_representative_and_replace_chain(start_cluster):
         current_cluster = start_cluster
         chain = []
+
         # Traverse through the single child chain
         while len(current_cluster.children) == 1:
             chain.append(current_cluster)
@@ -425,17 +440,22 @@ def preprocess_condensed(condensed_hierarchy):
 
         # Append the last cluster in the chain
         chain.append(current_cluster)
-        
         #print(f"Processing chain: {[c.cluster_id for c in chain]}")
+
+        # # Select the first cluster in the chain with non-zero stability as the representative
+        # representative = chain[0]
+        # for cluster in chain:
+        #     if cluster.stability != 0:
+        #         representative = cluster
+        #         break
 
         # Find the representative with the highest stability
         representative = max(chain, key=lambda cluster: cluster.stability)
-        
         #print(f"Selected representative: {representative.cluster_id}")
 
         # Update the representative's children to be the last cluster's children
-        representative.children = current_cluster.children
-        
+        representative.children = current_cluster.children    
+
         # Update the parent cluster to point to the representative
         parent_cluster = None
         for cluster in condensed_hierarchy.values():
@@ -445,8 +465,8 @@ def preprocess_condensed(condensed_hierarchy):
                     cluster.children[i] = representative
                     break
             if parent_cluster:
-                break
-        
+                break      
+
         #if parent_cluster:
             #print(f"Parent cluster {parent_cluster.cluster_id} updated to have child {representative.cluster_id}")
 
@@ -465,12 +485,12 @@ def preprocess_condensed(condensed_hierarchy):
 
     # Identify and remove the root cluster
     root_cluster_id = max(condensed_hierarchy.keys())
+
     if root_cluster_id in condensed_hierarchy:
         #print(f"Removing root cluster: {root_cluster_id}")
         del condensed_hierarchy[root_cluster_id]
 
     return condensed_hierarchy
-
 
 def extract_clusters(processed_clusters):
     final_clusters = set()
@@ -527,17 +547,55 @@ def extract_clusters(processed_clusters):
     return list(final_clusters)
 
 
+# def transform_clusters(clusters, line_segments):
+#     reflection_clusters = []
+
+#     for cluster in clusters:
+#         cluster_lines = [line_segments[idx] for idx in cluster.elements]  # Get the actual line segments
+#         reflected_signals = lines_to_reflected_signals(cluster_lines)  # Convert lines to reflected signals
+#         reflection_cluster = ReflectionCluster(reflected_signals)  # Create a ReflectionCluster object
+#         reflection_clusters.append(reflection_cluster)  # Add to the list of reflection clusters
+
+#     return reflection_clusters
+
 def transform_clusters(clusters, line_segments):
     reflection_clusters = []
-
     for cluster in clusters:
-        cluster_lines = [line_segments[idx] for idx in cluster.elements]  # Get the actual line segments
-        reflected_signals = lines_to_reflected_signals(cluster_lines)  # Convert lines to reflected signals
-        reflection_cluster = ReflectionCluster(reflected_signals)  # Create a ReflectionCluster object
-        reflection_clusters.append(reflection_cluster)  # Add to the list of reflection clusters
-
+        cluster_lines = []
+        for idx in cluster.elements:
+            if 0 <= idx < len(line_segments):
+                cluster_lines.append(line_segments[idx])
+            else:
+                print(f"Warning: Invalid index {idx} found in cluster")
+        reflected_signals = lines_to_reflected_signals(cluster_lines)
+        reflection_cluster = ReflectionCluster(reflected_signals)
+        reflection_clusters.append(reflection_cluster)
     return reflection_clusters
 
 # Helper function to convert lines to reflected signals
 def lines_to_reflected_signals(lines):
     return [line.reflected_signal for line in lines]
+
+def verify_cluster_indices(clusters, total_segments):
+    all_indices = set()
+    for cluster in clusters:
+        all_indices.update(cluster.elements)
+    missing = set(range(total_segments)) - all_indices
+    extra = all_indices - set(range(total_segments))
+    if missing or extra:
+        print(f"Warning: Inconsistent indices. Missing: {missing}, Extra: {extra}")
+    return len(missing) == 0 and len(extra) == 0
+
+def verify_index_consistency(mst, clusters, line_segments):
+    mst_indices = set(range(mst.shape[0]))
+    cluster_indices = set()
+    for cluster in clusters:
+        cluster_indices.update(cluster.elements)
+    line_segment_indices = set(range(len(line_segments)))
+    
+    print(f"MST indices: {mst_indices}")
+    print(f"Cluster indices: {cluster_indices}")
+    print(f"Line segment indices: {line_segment_indices}")
+    
+    assert mst_indices == line_segment_indices, "MST and line segment indices mismatch"
+    assert cluster_indices.issubset(line_segment_indices), "Cluster indices not a subset of line segment indices"
